@@ -1,0 +1,6 @@
+{
+  "tech": ["FB", "AAPL", "AMZN", "NFLX", "GOOGL"],
+  "meme": ["AMC", "GME"],
+  "misc": ["JPM", "TSLA"],
+  "etf": ["SPY", "VOO"]
+}
