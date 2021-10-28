@@ -30,9 +30,13 @@ def test_gather_data():
 
 
 def test_s3_upload():
+    aws_config_fp = os.path.join(os.getcwd(), 'config', 'aws_config.json')
+    with open(aws_config_fp) as fp:
+        aws_config = json.load(fp)
+    bucket_name = aws_config['bucket_name']
     s3 = get_s3_resource()
-    upload_file_to_bucket(s3, 'my-test-bucket', os.path.join(os.getcwd(), 'data', 'AAPL.csv'))
-    list_bucket_objects(s3, 'my-test-bucket')
+    upload_file_to_bucket(s3, bucket_name, os.path.join(os.getcwd(), 'data', 'AAPL.csv'))
+    list_bucket_objects(s3, bucket_name)
 
 
 if __name__ == '__main__':
