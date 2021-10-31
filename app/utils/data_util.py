@@ -2,7 +2,6 @@ import os
 from pandas.core.frame import DataFrame
 import yfinance as yf
 import pandas as pd
-import datetime as dt
 from pandas import DatetimeIndex
 import matplotlib.pyplot as plt
 
@@ -87,24 +86,9 @@ def normalize_prices(prices: DataFrame) -> DataFrame:
     return prices/prices.iloc[0]
 
 
-def plot_data(prices: DataFrame, title: str = "Stock prices", xlabel:str = "Date", ylabel: str = "Price" ):	 		  		  		    	 		 		   		 		  
+def plot_data(prices: DataFrame, title: str = "Stock prices", xlabel:str = "Date", ylabel: str = "Price" ) -> None:	 		  		  		    	 		 		   		 		  
     """Plot stock prices with a custom title and meaningful axis labels."""	  	   		   	 		  		  		    	 		 		   		 		  
     ax = prices.plot(title=title, fontsize=12)
     ax.set_xlabel(xlabel)  		  	   		   	 		  		  		    	 		 		   		 		  
     ax.set_ylabel(ylabel)  		  	   		   	 		  		  		    	 		 		   		 		  
     plt.show()
-
-
-if __name__ == '__main__':
-    # main()
-    symbols = ["FB", "AAPL"]
-    start_date = dt.datetime(2021, 1, 15)
-    end_date = dt.datetime(2021, 4, 27)
-    dates = pd.date_range(start_date,end_date)
-
-    prices_df = get_prices(symbols, dates)
-    prices_normed = normalize_prices(prices_df)
-    # plot_data(prices_normed)
-
-    FB_stock_data = clean_data("FB", dates)
-    print(FB_stock_data)
