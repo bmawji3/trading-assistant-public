@@ -13,7 +13,7 @@ def gather_data(symbols_array, spaces_array):
             data[symbol].to_csv(f'{os.path.join(os.getcwd(), "data", f"{symbol}.csv")}')
 
 
-def symbol_to_path(symbol: str, base_dir: str = None) -> str:
+def get_filepath(symbol: str, base_dir: str = None) -> str:
     """Return CSV file path given ticker symbol.
     :param symbol: ticker symbol
     :param base_dir: relative location of market data folder
@@ -25,16 +25,15 @@ def symbol_to_path(symbol: str, base_dir: str = None) -> str:
     return os.path.join(base_dir, "{}.csv".format(symbol))
 
 
-def get_prices(symbols: list, dates: DatetimeIndex, adj_close_col_name: str ="Adj Close") -> DataFrame:
+def get_closings(symbols: list, dates: DatetimeIndex, adj_close_col_name: str ="Adj Close") -> DataFrame:
     """Read stock data (adjusted close) for given symbols from downloaded CSV files.
     :param symbols: list of symbols to read from CSV files
     :param dates: dates for the data retrieval
-    # :param addSPY: whether to add SPY to the columns
     :param adj_close_col_name: column name to retrieve adjusted closing prices
     :type symbols: list
     """
 
-    prices = pd.DataFrame(index=dates)
+    closings = pd.DataFrame(index=dates)
 
     if "SPY" not in symbols:  # add SPY for reference, if absent  		  	   		   	 		  		  		    	 		 		   		 		  
         symbols_addSPY = ["SPY"] + list(symbols)  # handles the case where symbols is np array of 'object' 
@@ -44,46 +43,48 @@ def get_prices(symbols: list, dates: DatetimeIndex, adj_close_col_name: str ="Ad
 
     for symbol in symbols_addSPY:
         df_temp = pd.read_csv(
-            symbol_to_path(symbol),
+            get_filepath(symbol),
             index_col="Date",
             parse_dates=True,
             usecols=["Date", adj_close_col_name],
             na_values=["nan"],
         )
         df_temp = df_temp.rename(columns={adj_close_col_name: symbol})
-        prices = prices.join(df_temp)
+        closings = closings.join(df_temp)
         if symbol == "SPY":  # drop dates when SPY did not trade  		  	   		   	 		  		  		    	 		 		   		 		  
-            prices = prices.dropna(subset=["SPY"])
+            closings = closings.dropna(subset=["SPY"])
 
     if "SPY" not in symbols and symbols != []:
-        prices = prices.drop("SPY", axis=1)  # remove SPY as it was only needed for trading days
+        closings = closings.drop("SPY", axis=1)  # remove SPY as it was only needed for trading days
     
-    prices.ffill(inplace=True)  # first forward fill prices
-    prices.bfill(inplace=True)  # second backward fill prices
+    closings.ffill(inplace=True)  # first forward fill prices
+    closings.bfill(inplace=True)  # second backward fill prices
 
-    return prices
+    return closings
 
-def clean_data(symbol: str, dates: DatetimeIndex) -> DataFrame:
+def get_ohlcv(symbol: str, dates: DatetimeIndex) -> DataFrame:
     """Ensures stock data match days where SPY traded and fills any missing data.
+    Returns dataframe with ["open", "high", "low", "close","volume"]
     :param symbol: Stock symbol
     :param dates: Dates of stock data to clean
     """
-    SPY_adj_close = get_prices(symbols=[],dates=dates)
-    
+    SPY_adj_close = get_closings(symbols=[],dates=dates)
+        
 
-    symbol_data = pd.read_csv(symbol_to_path(symbol), index_col="Date", parse_dates=True, na_values=["nan"])
-    stock_data = pd.merge(SPY_adj_close, symbol_data, how="inner", left_index=True, right_index=True)
-    stock_data = stock_data.drop("SPY", axis=1)
-    stock_data.ffill(inplace=True)
-    stock_data.bfill(inplace=True)
+    temp_data = pd.read_csv(get_filepath(symbol), index_col="Date", parse_dates=True, na_values=["nan"])
+    ohlcv = pd.merge(SPY_adj_close, temp_data, how="inner", left_index=True, right_index=True)
+    ohlcv = ohlcv.drop(["SPY","Adj Close"], axis=1)
+    ohlcv.ffill(inplace=True)
+    ohlcv.bfill(inplace=True)
+    ohlcv.columns = ["open", "high", "low", "close", "volume"]
 
-    return stock_data
+    return ohlcv
 
-def normalize_prices(prices: DataFrame) -> DataFrame:
-    """Normalize the prices
-    :param prices: DataFrame of closing prices
+def normalize(data: DataFrame) -> DataFrame:
+    """Normalize a given dataframe
+    :param data: DataFrame to be normalized.
     """
-    return prices/prices.iloc[0]
+    return data/data.iloc[0]
 
 
 def plot_data(prices: DataFrame, title: str = "Stock prices", xlabel:str = "Date", ylabel: str = "Price" ) -> None:	 		  		  		    	 		 		   		 		  
