@@ -6,7 +6,34 @@ from utils.data_util import gather_data
 
 
 def main():
-    pass
+    # Set up variables
+    cwd = os.getcwd()
+    data_directory = os.path.join(cwd, 'data')
+
+    # Read Config
+    aws_config_fp = os.path.join(os.getcwd(), 'config', 'aws_config.json')
+    with open(aws_config_fp) as fp:
+        aws_config = json.load(fp)
+
+    # Set up Session & Resource
+    session = start_session(aws_config['access_key'], aws_config['secret_access_key'])
+    s3 = get_s3_resource(session)
+    bucket = aws_config['bucket_name']
+
+    # List current Buckets & Objects per Bucket
+    print_bucket_objects(s3, bucket)
+
+    # Upload files to Bucket
+    files = [f for f in os.listdir(data_directory) if f.endswith('.csv')]
+    for file in files:
+        upload_file_to_bucket(s3, bucket, os.path.join(data_directory, file), file)
+
+    # (Optional) Delete files from Bucket
+    # for file in files:
+    #     delete_object(s3, bucket, file)
+
+    # List Buckets & Objects after Upload
+    print_bucket_objects(s3, bucket)
 
 
 def test_gather_data():
@@ -29,16 +56,5 @@ def test_gather_data():
         gather_data(symbols_array, spaces_array)
 
 
-def test_s3_upload():
-    aws_config_fp = os.path.join(os.getcwd(), 'config', 'aws_config.json')
-    with open(aws_config_fp) as fp:
-        aws_config = json.load(fp)
-    bucket_name = aws_config['bucket_name']
-    s3 = get_s3_resource()
-    upload_file_to_bucket(s3, bucket_name, os.path.join(os.getcwd(), 'data', 'AAPL.csv'))
-    list_bucket_objects(s3, bucket_name)
-
-
 if __name__ == '__main__':
-    # main()
-    test_gather_data()
+    main()
