@@ -25,25 +25,25 @@ def get_filepath(symbol: str, base_dir: str = None) -> str:
     return os.path.join(base_dir, "{}.csv".format(symbol))
 
 
-def get_closings(symbols: list, dates: DatetimeIndex, adj_close_col_name: str ="Adj Close") -> DataFrame:
+def get_closings(symbols: list, dates: DatetimeIndex, adj_close_col_name: str = "Adj Close",
+                 base_dir=None) -> DataFrame:
     """Read stock data (adjusted close) for given symbols from downloaded CSV files.
     :param symbols: list of symbols to read from CSV files
     :param dates: dates for the data retrieval
     :param adj_close_col_name: column name to retrieve adjusted closing prices
+    :param base_dir: Optional parameter for specifying file path if function called from different location
     :type symbols: list
     """
 
     closings = pd.DataFrame(index=dates)
 
+    symbols_addSPY = list(symbols)
     if "SPY" not in symbols:  # add SPY for reference, if absent  		  	   		   	 		  		  		    	 		 		   		 		  
-        symbols_addSPY = ["SPY"] + list(symbols)  # handles the case where symbols is np array of 'object' 
-
-    if symbols == []:
-        symbols_addSPY = ["SPY"]
+        symbols_addSPY = ["SPY"] + symbols_addSPY  # handles the case where symbols is np array of 'object'
 
     for symbol in symbols_addSPY:
         df_temp = pd.read_csv(
-            get_filepath(symbol),
+            get_filepath(symbol, base_dir=base_dir),
             index_col="Date",
             parse_dates=True,
             usecols=["Date", adj_close_col_name],
@@ -62,16 +62,17 @@ def get_closings(symbols: list, dates: DatetimeIndex, adj_close_col_name: str ="
 
     return closings
 
-def get_ohlcv(symbol: str, dates: DatetimeIndex) -> DataFrame:
+def get_ohlcv(symbol: str, dates: DatetimeIndex, base_dir=None) -> DataFrame:
     """Ensures stock data match days where SPY traded and fills any missing data.
     Returns dataframe with ["open", "high", "low", "close","volume"]
     :param symbol: Stock symbol
     :param dates: Dates of stock data to clean
+    :param base_dir: Base directory from where to read data
     """
-    SPY_adj_close = get_closings(symbols=[],dates=dates)
-        
+    SPY_adj_close = get_closings(symbols=[], dates=dates, base_dir=base_dir)
 
-    temp_data = pd.read_csv(get_filepath(symbol), index_col="Date", parse_dates=True, na_values=["nan"])
+    temp_data = pd.read_csv(get_filepath(symbol, base_dir=base_dir),
+                            index_col="Date", parse_dates=True, na_values=["nan"])
     ohlcv = pd.merge(SPY_adj_close, temp_data, how="inner", left_index=True, right_index=True)
     ohlcv = ohlcv.drop(["SPY","Adj Close"], axis=1)
     ohlcv.ffill(inplace=True)
@@ -87,7 +88,7 @@ def normalize(data: DataFrame) -> DataFrame:
     return data/data.iloc[0]
 
 
-def plot_data(prices: DataFrame, title: str = "Stock prices", xlabel:str = "Date", ylabel: str = "Price" ) -> None:	 		  		  		    	 		 		   		 		  
+def plot_data(prices: DataFrame, title: str = "Stock prices", xlabel: str = "Date", ylabel: str = "Price") -> None:
     """Plot stock prices with a custom title and meaningful axis labels."""	  	   		   	 		  		  		    	 		 		   		 		  
     ax = prices.plot(title=title, fontsize=12)
     ax.set_xlabel(xlabel)  		  	   		   	 		  		  		    	 		 		   		 		  
