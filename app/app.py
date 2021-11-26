@@ -59,7 +59,7 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
     return df_array
 
 
-def train_model(df):
+def train_model(df, symbol, debug=False):
     feature_cols = df.columns[:-1]
     label_cols = df.columns[-1:]
     train, test = np.split(df, [int(.6 * len(df))])
@@ -74,12 +74,17 @@ def train_model(df):
     clf = RandomForestClassifier(n_estimators=100, random_state=42)
     clf.fit(X_train, y_train.values.ravel())
     y_pred = clf.predict(X_test)
-    y_test = y_test.values.ravel()
-    print(f'Feature Importances: '
-          f'{sorted(list(zip(X_train, clf.feature_importances_)), key=lambda tup: tup[1], reverse=True)}')
-    print(f'Mean Absolute Error: {metrics.mean_absolute_error(y_test, y_pred)}')
-    print(f'Mean Squared Error: {metrics.mean_squared_error(y_test, y_pred)}')
-    print(f'Root Mean Squared Error: {np.sqrt(metrics.mean_squared_error(y_test, y_pred))}')
+    y_test_ravel = y_test.values.ravel()
+    df_y_pred = pd.DataFrame(y_pred, index=y_test.index, columns=[f'Y_{symbol}'])
+
+    if debug:
+        print(f'Feature Importances: '
+              f'{sorted(list(zip(X_train, clf.feature_importances_)), key=lambda tup: tup[1], reverse=True)}')
+        print(f'Mean Absolute Error: {metrics.mean_absolute_error(y_test_ravel, y_pred)}')
+        print(f'Mean Squared Error: {metrics.mean_squared_error(y_test_ravel, y_pred)}')
+        print(f'Root Mean Squared Error: {np.sqrt(metrics.mean_squared_error(y_test_ravel, y_pred))}')
+
+    return df_y_pred
 
 
 def s3_upload_and_list():
@@ -113,7 +118,7 @@ def s3_upload_and_list():
     print_bucket_objects(s3, bucket)
 
 
-def gather_download_data(download_new_data=False):
+def gather_download_data(sd, ed, download_new_data=False):
     symbols_config_fp = os.path.join(os.getcwd(), 'config', 'symbols_config.json')
     with open(symbols_config_fp) as fp:
         symbols_config = json.load(fp)
@@ -128,22 +133,46 @@ def gather_download_data(download_new_data=False):
         for array in symbols_array:
             spaces = " ".join(array)
             spaces_array.append(spaces)
-        gather_data(symbols_array, spaces_array)
+        gather_data(symbols_array, spaces_array, sd=sd, ed=ed)
 
 
 if __name__ == '__main__':
-    # import_function()
+    debug = False
+    buy_signal_recognized_list = list()
+    empty_df_count = 0
+    percent_gain = 0.00001
+    start_time = dt.datetime.now()
+    # import_function()  # Gathers data for S&P 500 Stocks
     cwd = os.getcwd()
     data_directory = os.path.join(cwd, 'data')
     files = [f for f in os.listdir(data_directory) if f.endswith('.csv')]
     symbols = [symbol.split('.csv')[0] for symbol in files]
     start_date = dt.datetime(2011, 11, 1)
-    end_date = dt.datetime(2021, 11, 24)
-    df_array = prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=0.00001)
+    end_date = dt.date.today()
+    # gather_download_data(start_date, end_date, True)  # Gathers data for Custom stocks in symbols_config.json
+    df_array = prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=percent_gain)
     for symbol, df in zip(symbols, df_array):
-        print('-' * len(str(symbol)))
-        print(symbol)
-        print('-' * len(str(symbol)))
-        print()
-        train_model(df)
-        print()
+        if debug:
+            print('-' * len(str(symbol)))
+            print(symbol)
+            print('-' * len(str(symbol)))
+            print()
+        if len(df) == 0:
+            empty_df_count += 1
+            continue
+        df_prediction = train_model(df, symbol, debug=debug)
+        if df_prediction[f'Y_{symbol}'].tail(1).values[0] == 1:
+            buy_signal_recognized_list.append(symbol)
+        if debug:
+            print()
+    end_time = dt.datetime.now()
+
+    print(f'--------------------------------------------')
+    print('STATS')
+    print(f'Time taken: {end_time - start_time}')
+    print(f'Number of Stock Symbols Recognized: {len(buy_signal_recognized_list)}/{len(files) - empty_df_count}')
+    print()
+    print('RESULTS')
+    print(f'For date {end_date}, the following are good stocks with an estimated percent gain {percent_gain}%')
+    [print(stock) for stock in buy_signal_recognized_list]
+    print(f'--------------------------------------------')
