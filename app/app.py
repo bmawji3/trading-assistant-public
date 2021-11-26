@@ -2,13 +2,16 @@ import datetime as dt
 import json
 import os
 import pandas as pd
+from sklearn import metrics
+from sklearn.ensemble import RandomForestClassifier
 
+from ImportSecurities import *
 from utils.aws_util import *
 from utils.data_util import *
 from utils.indicators import *
 
 
-def test_prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
+def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
     dates = pd.date_range(start_date, end_date)
     df_array = list()
     # prices_df = get_closings(symbols, dates, base_dir='data')
@@ -37,9 +40,9 @@ def test_prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
 
         # Sum the values where column was > % gain parameter
         join_df['Y'] = y_df.sum(axis=1)
-        # If sum > 50%, Then Mark as a Buy Signal, Else Not a Buy Signal
-        join_df['Y'] = np.where(join_df['Y'] > np.ceil(len(y_columns) / 2), 1, 0)
-        join_df.name = symbol
+        # If sum > ~50%, Then Mark as a Buy Signal, Else Not a Buy Signal
+        join_df['Y'] = np.where(join_df['Y'] > np.floor(len(y_columns) / 2), 1, 0)
+        join_df = join_df.dropna()
 
         df_array.append(join_df)
 
@@ -56,7 +59,30 @@ def test_prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
     return df_array
 
 
-def test_s3_functions():
+def train_model(df):
+    feature_cols = df.columns[:-1]
+    label_cols = df.columns[-1:]
+    train, test = np.split(df, [int(.6 * len(df))])
+    X_train, y_train = train[feature_cols], train[label_cols]
+    X_test, y_test = test[feature_cols], test[label_cols]
+
+    # print('X_train\n', X_train.head(20))
+    # print('y_train\n', y_train.head(20))
+    # print('X_test\n', X_test.head(20))
+    # print('y_test\n', y_test.head(20))
+
+    clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    clf.fit(X_train, y_train.values.ravel())
+    y_pred = clf.predict(X_test)
+    y_test = y_test.values.ravel()
+    print(f'Feature Importances: '
+          f'{sorted(list(zip(X_train, clf.feature_importances_)), key=lambda tup: tup[1], reverse=True)}')
+    print(f'Mean Absolute Error: {metrics.mean_absolute_error(y_test, y_pred)}')
+    print(f'Mean Squared Error: {metrics.mean_squared_error(y_test, y_pred)}')
+    print(f'Root Mean Squared Error: {np.sqrt(metrics.mean_squared_error(y_test, y_pred))}')
+
+
+def s3_upload_and_list():
     # Set up variables
     cwd = os.getcwd()
     data_directory = os.path.join(cwd, 'data')
@@ -87,13 +113,11 @@ def test_s3_functions():
     print_bucket_objects(s3, bucket)
 
 
-def test_gather_data():
-    download_new_data = False
+def gather_download_data(download_new_data=False):
     symbols_config_fp = os.path.join(os.getcwd(), 'config', 'symbols_config.json')
     with open(symbols_config_fp) as fp:
         symbols_config = json.load(fp)
 
-    print(symbols_config)
     symbols_array = []
     for category, array in symbols_config.items():
         symbols_array.append(array)
@@ -108,14 +132,18 @@ def test_gather_data():
 
 
 if __name__ == '__main__':
-    symbols = ['FB', 'AAPL']
-    start_date = dt.datetime(2021, 1, 15)
-    end_date = dt.datetime(2021, 4, 27)
-    df_array = test_prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=0.001)
-    for df in df_array:
-        print('-' * len(str(df.name)))
-        print(df.name)
-        print('-' * len(str(df.name)))
+    # import_function()
+    cwd = os.getcwd()
+    data_directory = os.path.join(cwd, 'data')
+    files = [f for f in os.listdir(data_directory) if f.endswith('.csv')]
+    symbols = [symbol.split('.csv')[0] for symbol in files]
+    start_date = dt.datetime(2011, 11, 1)
+    end_date = dt.datetime(2021, 11, 24)
+    df_array = prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=0.00001)
+    for symbol, df in zip(symbols, df_array):
+        print('-' * len(str(symbol)))
+        print(symbol)
+        print('-' * len(str(symbol)))
         print()
-        print(df)
+        train_model(df)
         print()

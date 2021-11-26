@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 
 def gather_data(symbols_array, spaces_array):
     for space, arr in zip(spaces_array, symbols_array):
-        data = yf.download(space, period='ytd', group_by='ticker')
+        # data = yf.download(space, period='ytd', group_by='ticker')
+        data = yf.download(space, start="2011-11-01", end='2021-11-25', group_by='ticker')
         for symbol in arr:
             data[symbol].to_csv(f'{os.path.join(os.getcwd(), "data", f"{symbol}.csv")}')
 
