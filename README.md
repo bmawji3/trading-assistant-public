@@ -15,9 +15,12 @@ e.g. use ```python3 -m http.server```
 
 e.g. ```cd app && python app.py```
 
-**Reddit Stock Selector
+**Reddit Stock Selector**
+
 In: DateTime
+
 Out: {Ticker: Mentions} in descending order, no tickers with 0 mentions presented.
+
 e.g.
 ```
 test = PushShift(datetime.datetime(2021, 1, 1))
