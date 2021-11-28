@@ -1,3 +1,5 @@
 {
-  "bucket_name": "my-test-bucket"
+  "bucket_name": "cse6242-wsb-assistant",
+  "access_key": "",
+  "secret_access_key": ""
 }
