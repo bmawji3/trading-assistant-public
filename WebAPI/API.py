@@ -12,7 +12,7 @@ parser.add_argument('date')
 class Ticker(Resource):
      def get(self, ticker_id):
         ## Returns dictionary of stock data
-        data = pd.read_csv(f'./app/data/{ticker_id}.csv')  # read CSV
+        data = pd.read_csv(f'../app/data/{ticker_id}.csv')  # read CSV
         data = data.to_dict()  # convert dataframe to dictionary
         return {'data': data}, 200 
 
