@@ -146,21 +146,47 @@ def get_list_of_predicted_stocks(percent_gain, given_date, debug=False):
     start_date = dt.datetime(2011, 11, 1)
     end_date = dt.date.today()
     df_array = prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=percent_gain)
+
+    check_first_df = True
+    check_first_df_date = False
+
+    if len(df_array) >= 1:
+        first_df = df_array[0]
+        if len(first_df) == 0:
+            check_first_df = False
+        if check_first_df:
+            try:
+                if first_df[f'Y'][given_date] == 1 or first_df[f'Y'][given_date] == 0:
+                    check_first_df_date = True
+            except KeyError as e:
+                if debug:
+                    print(f'Invalid given_date index/key for {e}')
+
+    if not check_first_df_date:
+        return {
+            'buy_signal_recognized_list': buy_signal_recognized_list,
+            'len_buy_signal_list': len(buy_signal_recognized_list),
+            'len_files': len(files),
+            'empty_df_count': empty_df_count,
+            'given_date': given_date
+        }
+
     for symbol, df in zip(symbols, df_array):
         if len(df) == 0:
             empty_df_count += 1
             continue
+
+        # Train model
         df_prediction = train_model(df, symbol, debug=debug)
-        try:
-            if df_prediction[f'Y_{symbol}'][given_date] == 1:
-                buy_signal_recognized_list.append(symbol)
-        except KeyError as e:
-            print(f'Invalid given_date index/key for {e}')
+        if df_prediction[f'Y_{symbol}'][given_date] == 1:
+            buy_signal_recognized_list.append(symbol)
 
     return {
         'buy_signal_recognized_list': buy_signal_recognized_list,
+        'len_buy_signal_list': len(buy_signal_recognized_list),
         'len_files': len(files),
-        'empty_df_count': empty_df_count
+        'empty_df_count': empty_df_count,
+        'given_date': given_date
     }
 
 
@@ -188,9 +214,39 @@ def get_technical_indicators_for_date(symbol, given_date,
     }
 
 
+def write_predictions_to_csv(start_date, end_date, percent_gain, path, debug=False):
+    date_range = pd.date_range(start_date, end_date)
+    data = dict()
+    for date in date_range:
+        predictions_dictionary = get_list_of_predicted_stocks(percent_gain, date)
+        buy_signal_recognized_list = predictions_dictionary['buy_signal_recognized_list']
+        buy_signal_recognized_str = '_'.join(buy_signal_recognized_list)
+        data[date] = buy_signal_recognized_str
+
+    df = pd.DataFrame(data.items(), columns=['Date', 'Symbols'])
+    df = df.set_index('Date')
+    df.to_csv(os.path.join(path, f'predictions.csv'))
+
+
+def read_predictions(given_date, debug=False):
+    df = pd.read_csv(f'trading_assistant_app/predictions/predictions.csv')
+    df = df.set_index('Date')
+    try:
+        symbols = df['Symbols'][given_date]
+    except KeyError as e:
+        print(f'Invalid given_date index/key for {e}')
+        symbols = ''
+    if isinstance(symbols, float):
+        if np.isnan(symbols):
+            return []
+    elif isinstance(symbols, str):
+        return symbols.split('_')
+
+
 if __name__ == '__main__':
     debug = False
     percent_gain = 0.003
+    path = os.path.join('trading_assistant_app', 'predictions')
     requested_date = '2021-11-24'
     start_time = dt.datetime.now()
     # import_function()  # Gathers data for S&P 500 Stocks
@@ -200,6 +256,12 @@ if __name__ == '__main__':
     len_files = predicted_stocks_dictionary['len_files']
     empty_df_count = predicted_stocks_dictionary['empty_df_count']
     end_time = dt.datetime.now()
+
+    # Write predictions to CSV & Read them
+    # start_date = dt.datetime(2021, 11, 1)
+    # end_date = dt.datetime(2021, 11, 24)
+    # write_predictions_to_csv(start_date, end_date, percent_gain, path)
+    # pred = read_predictions(requested_date)
 
     print(f'--------------------------------------------')
     print('STATS')

@@ -23,7 +23,7 @@ class DailyStocks(Resource):
 
         args = parser.parse_args()
         date = args['date']
-        predicted_stocks = ta.get_list_of_predicted_stocks(0.003, date)
+        predicted_stocks = ta.read_predictions(date)
         return {'data': predicted_stocks}, 200
 
 class Indicators(Resource):
