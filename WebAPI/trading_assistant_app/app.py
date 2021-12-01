@@ -164,6 +164,30 @@ def get_list_of_predicted_stocks(percent_gain, given_date, debug=False):
     }
 
 
+def get_technical_indicators_for_date(symbol, given_date,
+                                      start_date=dt.datetime(2011, 11, 1), end_date=dt.date.today()):
+    dates = pd.date_range(start_date, end_date)
+    df_array = list()
+    # prices_df = get_closings(symbols, dates, base_dir='data')
+    # prices_normed = normalize(prices_df)
+
+    stock_data = get_ohlcv(symbol, dates, base_dir='trading_assistant_app/data')
+    sma_symbol = sma(stock_data, window=5)
+    ema_symbol = ema(stock_data, window=5)
+    vama_symbol = vama(stock_data, window=5)
+
+    # Compile TA into joined DF & FFILL / BFILL
+    join_df = pd.concat([sma_symbol, ema_symbol, vama_symbol], axis=1)
+    join_df.ffill(inplace=True)
+    join_df.bfill(inplace=True)
+
+    return {
+        'sma': join_df['SMA5'][given_date],
+        'ema': join_df['EMA5'][given_date],
+        'vama': join_df['VAMA5'][given_date]
+    }
+
+
 if __name__ == '__main__':
     debug = False
     percent_gain = 0.003

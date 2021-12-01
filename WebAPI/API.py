@@ -32,8 +32,8 @@ class Indicators(Resource):
         
         args = parser.parse_args()
         date = args['date']
-
-        return {'data': ''}, 200 
+        technical_indicators = ta.get_technical_indicators_for_date(ticker_id, date)
+        return {'data': technical_indicators}, 200
 
 
 api.add_resource(Ticker, '/ticker/<string:ticker_id>') 
