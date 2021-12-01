@@ -1,21 +1,24 @@
 name: TradingAssistantApp
 channels:
+  - conda-forge
   - defaults
 dependencies:
+  - aniso8601=9.0.1=pyhd8ed1ab_0
   - atomicwrites=1.4.0=py_0
   - attrs=21.2.0=pyhd3eb1b0_0
   - blas=1.0=mkl
   - bottleneck=1.3.2=py38h2a96729_1
   - brotli=1.0.9=ha925a31_2
   - brotlipy=0.7.0=py38h2bbff1b_1003
-  - ca-certificates=2021.10.26=haa95532_2
-  - certifi=2021.10.8=py38haa95532_0
+  - ca-certificates=2021.10.8=h5b45459_0
+  - certifi=2021.10.8=py38haa244fe_1
   - cffi=1.15.0=py38h2bbff1b_0
   - click=8.0.1=pyhd3eb1b0_0
   - colorama=0.4.4=pyhd3eb1b0_0
   - cryptography=35.0.0=py38h71e12ea_0
   - cycler=0.10.0=py38_0
   - flask=1.1.2=pyhd3eb1b0_0
+  - flask-restful=0.3.9=pyhd8ed1ab_0
   - fonttools=4.25.0=pyhd3eb1b0_0
   - freetype=2.10.4=hd328e21_0
   - future=0.18.2=py38_1
@@ -50,7 +53,7 @@ dependencies:
   - numpy=1.21.2=py38hfca59bb_0
   - numpy-base=1.21.2=py38h0829f74_0
   - olefile=0.46=pyhd3eb1b0_0
-  - openssl=1.1.1l=h2bbff1b_0
+  - openssl=1.1.1l=h8ffe710_0
   - packaging=21.0=pyhd3eb1b0_0
   - pandas=1.3.3=py38h6214cd6_0
   - pandas-datareader=0.10.0=pyhd3eb1b0_0
@@ -66,6 +69,7 @@ dependencies:
   - pytest=6.2.4=py38haa95532_2
   - python=3.8.11=h6244533_1
   - python-dateutil=2.8.2=pyhd3eb1b0_0
+  - python_abi=3.8=2_cp38
   - pytz=2021.3=pyhd3eb1b0_0
   - qt=5.9.7=vc14h73c81de_0
   - requests=2.26.0=pyhd3eb1b0_0
