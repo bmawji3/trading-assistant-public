@@ -1,411 +1,317 @@
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-      <meta charset="utf-8">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-      <meta content="Responsive Bootstrap Multi-Purpose Crypto Trading User Interface" name="description" />
-        <meta name="keywords" content="crypto, Bootstrap, bitcoins, ethereum, dogecoin, iota, ripple, siacoin, exchange, trading platform, crypto trading">
-      <meta name="author" content="">
-      <title>r/wallstreetbets - Trading Assistant</title>
-      <link rel="stylesheet" href="app/css/bootstrap.css">
-      <link rel="stylesheet" href="plugins/fontawesome/css/font-awesome.css">
-      <link rel="stylesheet" href="plugins/animo/animate%2banimo.css">
-      <link rel="stylesheet" href="plugins/csspinner/csspinner.min.css">
-      <link rel="stylesheet" href="app/css/app.css">
-      <script src="plugins/modernizr/modernizr.js"></script>
-      <script src="plugins/fastclick/fastclick.js"></script>
-   </head>
-   <body>
-      <div id="overlayLoader">
-          <div id="preloader">
-            <span></span>
-            <span></span>
-         </div>
-      </div>
 
-      <section class="wrapper">
-         <nav class="navbar navbar-default navbar-top navbar-fixed-top">
-            <div class="navbar-header">
-               <a href="#" class="navbar-brand">
-                  <div class="brand-logo"><i class="fa fa-line-chart"></i>r/wallstreetbets</div>
-                  <div class="brand-logo-collapsed"><i class="fa fa-line-chart"></i></div>
-               </a>
-            </div>
-            <div class="nav-wrapper">
-               <ul class="nav navbar-nav mt0">
-                  <li>
-                     <a href="#" data-toggle="aside">
-                     <em class="fa fa-align-left"></em>
-                     </a>
-                  </li>
-               </ul>
-            </div>
-         </nav>
-         <aside class="aside">
-            <nav class="sidebar">
-               <ul class="nav">
-                  <li>
-                     <div data-toggle="collapse-next" class="item user-block has-submenu">
-                        <div class="user-block-picture">
-                           <img src="app/img/user/02.jpg" alt="Avatar" width="60" height="60" class="img-thumbnail img-circle account-img-mb">
-                        </div>
-                        <div class="user-block-info">
-                           <span class="user-block-name item-text">James Franky</span>
-                           <span class="user-block-role"><i class="fa fa-check text-green"></i> Verified</span>
-                           <div class="label label-primary"><i class="fa fa-chevron-down"></i> Account Info</div>
-                        </div>
-                     </div>
-                     <ul class="nav collapse">
-                        <li><a href="javascript:void(0);">Open Orders</a>
-                        </li>
-                        <li><a href="javascript:void(0);">Transactions History</a>
-                        </li>
-                        <li>
-                           <a href="javascript:void(0);">
-                              Verification 
-                              <div class="label label-success pull-right"><i class="fa fa-check"></i> Verified</div>
-                           </a>
-                        </li>
-                        <li>
-                           <a href="javascript:void(0);">
-                              2FA 
-                              <div class="pull-right label label-danger"><i class="fa fa-unlock"></i> Not Enabled</div>
-                           </a>
-                        </li>
-                        <li><a href="javascript:void(0);">Bonus Code</a>
-                        </li>
-                        <li><a href="javascript:void(0);">Activity Log</a>
-                        </li>
-                        <li><a href="javascript:void(0);">API</a>
-                        </li>
-                        <li class="divider"></li>
-                        <li><a href="javascript:void(0);">Logout</a>
-                        </li>
-                     </ul>
-                  </li>
-                  <li class="active">
-                     <a href="index-2.html" title="Markets" data-toggle="collapse-next" class="has-submenu">
-                        <em class="fa fa-home"></em>
-                        <div class="label pull-right"><i class="fa fa-line-chart"></i></div>
-                        <span class="item-text">Markets</span>
-                     </a>
-                     <ul class="nav collapse in">
-                        <li class="active">
-                           <a href="index.html" title="Default" data-toggle="" class="no-submenu">
-                           <span class="item-text">Layout One</span>
-                           </a>
-                        </li>
-                        <li>
-                           <a href="index-2.html" title="Layout 2" data-toggle="" class="no-submenu">
-                           <span class="item-text">Layout Two</span>
-                           </a>
-                        </li>
-                        <li>
-                           <a href="index-3.html" title="Layout 3" data-toggle="" class="no-submenu">
-                           <span class="item-text">Layout Three</span>
-                           </a>
-                        </li>
-                        <li>
-                           <a href="index-4.html" title="With Footer" data-toggle="" class="no-submenu">
-                           <span class="item-text">Layout Four</span>
-                           </a>
-                        </li>
-                        <li>
-                           <a href="index-5.html" title="With Footer" data-toggle="" class="no-submenu">
-                           <span class="item-text">Layout Five</span>
-                           </a>
-                        </li>
-                        <li>
-                           <a href="index-3.html" title="With Footer" data-toggle="" class="no-submenu">
-                           <span class="item-text">Layout Six</span>
-                           </a>
-                        </li>
-                     </ul>
-                  </li>
-                  <li>
-                     <a href="prices.html" title="Dashboard" class="">
-                        <em class="fa fa-btc"></em>
-                        <span class="item-text">Live Pricing</span>
-                     </a>
-                  </li>
-                  <li class="">
-                     <a href="datatable.html" title="Dashboard" class="">
-                        <em class="fa fa-gear"></em>
-                        <span class="item-text">Shortcodes</span>
-                     </a>
-                  </li>
-                  <li>
-                     <a href="#" title="Pages" data-toggle="collapse-next" class="has-submenu">
-                     <em class="fa fa-file-text"></em>
-                     <span class="item-text">Pages</span>
-                     </a>
-                     <ul class="nav collapse ">
-                        <li>
-                           <a href="login.html" title="Login" data-toggle="" class="no-submenu">
-                           <span class="item-text">Login</span>
-                           </a>
-                        </li>
-                        <li>
-                           <a href="signup.html" title="Sign up" data-toggle="" class="no-submenu">
-                           <span class="item-text">Sign up</span>
-                           </a>
-                        </li>
-                        <li>
-                           <a href="lock.html" title="Lock" data-toggle="" class="no-submenu">
-                           <span class="item-text">Lock</span>
-                           </a>
-                        </li>
-                        <li>
-                           <a href="recover.html" title="Recover Password" data-toggle="" class="no-submenu">
-                           <span class="item-text">Recover Password</span>
-                           </a>
-                        </li>
-                     </ul>
-                  </li>
-               </ul>
-            </nav>
-         </aside>
-         <section>
-            <section class="main-content">
-               <div class="row">
-                  <div class="col-md-9">
-                     
-                     <!-- Chart Starts Here -->
-                     <div class="row">
-                        <div class="col-lg-12">
-                           <div class="panel panel-default">
-                              <div class="panel-collapse">
-                                 <div class="panel-body">
-                                    <h4>BTC-SC</h4>
-                                    <div id="candlestickChart" class="h-500">
-                                       
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-                     <!-- Chart Ends Here -->
-                     <div class="row">
-                        <div class="col-md-6">
-                        </div>
-                        <div class="col-md-6">
-                           <div class="panel panel-default">
-                              <div class="panel-heading">
-                                 <h3 class="panel-title">Price Prediction</h3>
-                              </div>
+<head>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+   <meta content="Responsive Bootstrap Multi-Purpose Crypto Trading User Interface" name="description" />
+   <meta name="keywords"
+      content="crypto, Bootstrap, bitcoins, ethereum, dogecoin, iota, ripple, siacoin, exchange, trading platform, crypto trading">
+   <meta name="author" content="">
+   <title>r/wallstreetbets - Trading Assistant</title>
+   <link rel="stylesheet" href="app/css/bootstrap.css">
+   <link rel="stylesheet" href="plugins/fontawesome/css/font-awesome.css">
+   <link rel="stylesheet" href="plugins/animo/animate%2banimo.css">
+   <link rel="stylesheet" href="plugins/csspinner/csspinner.min.css">
+   <link rel="stylesheet" href="app/css/app.css">
+   <script src="plugins/modernizr/modernizr.js"></script>
+   <script src="plugins/fastclick/fastclick.js"></script>
+</head>
+
+<body>
+   
+
+   <section class="wrapperFullWidth">
+
+      <nav class="navbar navbar-default navbar-top navbar-fixed-top">
+         <div class="navbar-header">
+            <a href="#" class="navbar-brand">
+               <div class="brand-logo">r/wallstreetbets TA</div>
+            </a>
+         </div>
+         <div class="nav-wrapper">
+            <ul class="nav navbar-nav mt0">
+               <li class="dropdown dropdown-list">
+                  <a href="#" data-toggle="dropdown" data-play="fadeIn" class="dropdown-toggle">
+                     <strong><i class="fa fa-file-text-o "></i> Paper Assistant</strong>
+                  </a>
+               </li>
+               <li class="dropdown dropdown-list">
+                  <a href="performance.html" data-toggle="dropdown" data-play="fadeIn" class="dropdown-toggle">
+                     <strong><i class="fa fa-tachometer"></i> Performance</strong>
+                  </a>
+               </li>
+            </ul>
+         </div>
+      </nav>
+      <section>
+         <section class="main-content">
+            <div class="row">
+               <div class="col-md-9">
+
+                  <!-- Chart Starts Here -->
+                  <div class="row">
+                     <div class="col-lg-12">
+                        <div class="panel panel-default">
+                           <div class="panel-collapse">
                               <div class="panel-body">
-                                 <div class="col-md-4">
-                                    <button type="button" class="btn btn-inverse btn-lg m-t-9">Skip</button>
-                                 </div>
-                                 <div class="col-md-4">
-                                    <button type="button" class="btn btn-danger btn-lg m-t-9">Bearish</button>
-                                 </div>
-                                 <div class="col-md-4">
-                                    <button type="button" class="btn btn-success btn-lg m-t-9">Bullish</button>
+                                 <h4>ABC</h4>
+                                 <div id="candlestickChart" class="h-300">
+
                                  </div>
                               </div>
                            </div>
                         </div>
-                        
-                        
-                        
                      </div>
                   </div>
-                  <div class="col-md-3">
-                     <div class="panel panel-default">
-                        <div class="panel-heading">
-                           <div class="panel-title">Social Metrics</div>
-                        </div>
-                        <div class="list-group">
-                           <div class="list-group-item">
-                              <div class="media">
-                                 <div class="pull-left">
-                                    <span class="fa-stack fa-lg">
-                                    <em class="fa fa-circle fa-stack-2x text-green"></em>
-                                    <em class="fa fa-level-up fa-stack-1x fa-inverse text-white"></em>
+                  <!-- Chart Ends Here -->
+                  <div class="row">
+                     <div class="col-md-3">
+                        <div data-toggle="play-animation" data-play="fadeInDown" data-offset="0" data-delay="1500" class="panel widget">
+                           <div class="panel-body bg-success">
+                              <div class="row row-table row-flush">
+                                 <div class="col-xs-12">
+                                    <p class="mb0"><em class="fa fa-money"></em> Buying Power</p>
+                                    <h4 class="m0">$100,000</h4>
+                                    <span class="f-left m-t-10">
+                                    0$ allocated on this stock
                                     </span>
-                                 </div>
-                                 <div class="media-body clearfix">
-                                    <strong>Metric 1</strong>
-                                    <p class="m0">
-                                       <small class="text-green">$0.02 <i class="fa fa-money"></i></small>
-                                    </p>
-                                    <p><i class="fa fa-btc"></i> 0.00000286</p>
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="list-group-item">
-                              <div class="media">
-                                 <div class="pull-left">
-                                    <span class="fa-stack fa-lg">
-                                    <em class="fa fa-circle fa-stack-2x text-green"></em>
-                                    <em class="fa fa-level-up fa-stack-1x fa-inverse text-white"></em>
-                                    </span>
-                                 </div>
-                                 <div class="media-body clearfix">
-                                    <strong>Metric 2</strong>
-                                    <p class="m0">
-                                       <small class="text-green">+1.35%</small>
-                                    </p>
-                                    <p><i class="fa fa-plus"></i> Gainer <i class="fa fa-level-up text-green"></i></p>
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="list-group-item">
-                              <div class="media">
-                                 <div class="pull-left">
-                                    <span class="fa-stack fa-lg">
-                                    <em class="fa fa-circle fa-stack-2x text-danger"></em>
-                                    <em class="fa fa-level-down fa-stack-1x fa-inverse text-white"></em>
-                                    </span>
-                                 </div>
-                                 <div class="media-body clearfix">
-                                    <strong>Metric 3</strong>
-                                    <p class="m0">
-                                       <small class="text-danger">$0.02</small>
-                                    </p>
-                                    <p><i class="fa fa-btc"></i> 0.00000261 <i class="fa fa-level-down text-danger"></i></p>
-                                 </div>
-                              </div>
-                           </div>
-                           <div class="list-group-item">
-                              <div class="media">
-                                 <div class="pull-left">
-                                    <span class="fa-stack fa-lg">
-                                    <em class="fa fa-circle fa-stack-2x text-green"></em>
-                                    <em class="fa fa-level-up fa-stack-1x fa-inverse text-white"></em>
-                                    </span>
-                                 </div>
-                                 <div class="media-body clearfix">
-                                    <strong>Metric 4</strong>
-                                    <p class="m0">
-                                       <small class="text-green">$0.02</small>
-                                    </p>
-                                    <p><i class="fa fa-btc"></i> 0.00000261 <i class="fa fa-level-up text-green"></i></p>
                                  </div>
                               </div>
                            </div>
                         </div>
                      </div>
-                     <!-- Coin Status Ends Here -->
-                     <div class="panel panel-default">
-                        <div class="panel-heading">
-                           <div class="pull-right"><i class="fa fa-bullhorn"></i></div>
-                           <div class="panel-title">Relevant News</div>
+                     <div class="col-md-9">
+                        <div class="panel panel-default">
+                           <div class="panel-heading">
+                              <h3 class="panel-title">Trading Decision</h3>
+                           </div>
+                           <div class="panel-body">
+                              <div class="col-md-4">
+                                 <div class="input-group">
+                                    <span class="input-group-addon">$</span>
+                                    <input type="number" min="1" step="any" class="form-control">
+                                    <span class="input-group-btn">
+                                       <button type="button" class="btn btn-success">Buy</button>
+                                    </span>
+                                 </div>
+                              </div>
+                              <div class="col-md-4">
+                                 <div class="input-group">
+                                    <span class="input-group-addon">$</span>
+                                    <input type="number" min="1" step="any" class="form-control">
+                                    <span class="input-group-btn">
+                                       <button type="button" class="btn btn-danger">Sell</button>
+                                    </span>
+                                 </div>
+                              </div>
+                              <div class="col-md-2">
+                                 <button type="button" class="btn btn-primary">Hold</button>
+                              </div>
+                              <div class="col-md-2">
+                                 <button type="button" class="btn btn-inverse">Skip</button>
+                              </div>
+                           </div>
                         </div>
-                        <div class="list-group">
-                           <a href="#" class="list-group-item">
-                              <div class="media">
-                                 <div class="media-body">
-                                    <small class="pull-right">2h</small>
-                                    <strong class="media-heading text-primary">James</strong>
-                                    <p><small>Posted by James@example</small></p>
-                                    <p class="mb-sm">
-                                       <small>We are adding iota coins read full notice example.com/adding-iota</small>
-                                    </p>
-                                 </div>
+                     </div>
+
+
+
+                  </div>
+               </div>
+               <div class="col-md-3">
+                  <div class="panel panel-default">
+                     <div class="panel-heading">
+                        <div class="panel-title">Social Metrics</div>
+                     </div>
+                     <div class="list-group">
+                        <div class="list-group-item">
+                           <div class="media">
+                              <div class="pull-left">
+                                 <span class="fa-stack fa-lg">
+                                    <em class="fa fa-circle fa-stack-2x text-green"></em>
+                                    <em class="fa fa-level-up fa-stack-1x fa-inverse text-white"></em>
+                                 </span>
                               </div>
-                           </a>
-                           <a href="#" class="list-group-item">
-                              <div class="media">
-                                 <div class="media-body">
-                                    <small class="pull-right">2h</small>
-                                    <strong class="media-heading text-primary">Jimmy</strong>
-                                    <p><small>Posted by Jimmy@example</small></p>
-                                    <p class="mb-sm">
-                                       <small>We have scheduled update for BTC on 03/04/2018 example.com/btc-update</small>
-                                    </p>
-                                 </div>
+                              <div class="media-body clearfix">
+                                 <strong>Metric 1</strong>
+                                 <p class="m0">
+                                    <small class="text-green">$0.02 <i class="fa fa-money"></i></small>
+                                 </p>
+                                 <p><i class="fa fa-btc"></i> 0.00000286</p>
                               </div>
-                           </a>
-                           <a href="#" class="list-group-item">
-                              <div class="media">
-                                 <div class="media-body">
-                                    <small class="pull-right">2h</small>
-                                    <strong class="media-heading text-primary">Franky</strong>
-                                    <p><small>Posted by Franky@example</small></p>
-                                    <p class="mb-sm">
-                                       <small>Vote for your favorite coin to be added example.com/vote-coin</small>
-                                    </p>
-                                 </div>
-                              </div>
-                           </a>
+                           </div>
                         </div>
-                        <div class="panel-footer clearfix">
-                           <a href="#" class="pull-left">
+                        <div class="list-group-item">
+                           <div class="media">
+                              <div class="pull-left">
+                                 <span class="fa-stack fa-lg">
+                                    <em class="fa fa-circle fa-stack-2x text-green"></em>
+                                    <em class="fa fa-level-up fa-stack-1x fa-inverse text-white"></em>
+                                 </span>
+                              </div>
+                              <div class="media-body clearfix">
+                                 <strong>Metric 2</strong>
+                                 <p class="m0">
+                                    <small class="text-green">+1.35%</small>
+                                 </p>
+                                 <p><i class="fa fa-plus"></i> Gainer <i class="fa fa-level-up text-green"></i></p>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="list-group-item">
+                           <div class="media">
+                              <div class="pull-left">
+                                 <span class="fa-stack fa-lg">
+                                    <em class="fa fa-circle fa-stack-2x text-danger"></em>
+                                    <em class="fa fa-level-down fa-stack-1x fa-inverse text-white"></em>
+                                 </span>
+                              </div>
+                              <div class="media-body clearfix">
+                                 <strong>Metric 3</strong>
+                                 <p class="m0">
+                                    <small class="text-danger">$0.02</small>
+                                 </p>
+                                 <p><i class="fa fa-btc"></i> 0.00000261 <i class="fa fa-level-down text-danger"></i>
+                                 </p>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="list-group-item">
+                           <div class="media">
+                              <div class="pull-left">
+                                 <span class="fa-stack fa-lg">
+                                    <em class="fa fa-circle fa-stack-2x text-green"></em>
+                                    <em class="fa fa-level-up fa-stack-1x fa-inverse text-white"></em>
+                                 </span>
+                              </div>
+                              <div class="media-body clearfix">
+                                 <strong>Metric 4</strong>
+                                 <p class="m0">
+                                    <small class="text-green">$0.02</small>
+                                 </p>
+                                 <p><i class="fa fa-btc"></i> 0.00000261 <i class="fa fa-level-up text-green"></i></p>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- Coin Status Ends Here -->
+                  <div class="panel panel-default">
+                     <div class="panel-heading">
+                        <div class="pull-right"><i class="fa fa-bullhorn"></i></div>
+                        <div class="panel-title">Relevant News</div>
+                     </div>
+                     <div class="list-group">
+                        <a href="#" class="list-group-item">
+                           <div class="media">
+                              <div class="media-body">
+                                 <small class="pull-right">2h</small>
+                                 <strong class="media-heading text-primary">James</strong>
+                                 <p><small>Posted by James@example</small></p>
+                                 <p class="mb-sm">
+                                    <small>We are adding iota coins read full notice example.com/adding-iota</small>
+                                 </p>
+                              </div>
+                           </div>
+                        </a>
+                        <a href="#" class="list-group-item">
+                           <div class="media">
+                              <div class="media-body">
+                                 <small class="pull-right">2h</small>
+                                 <strong class="media-heading text-primary">Jimmy</strong>
+                                 <p><small>Posted by Jimmy@example</small></p>
+                                 <p class="mb-sm">
+                                    <small>We have scheduled update for BTC on 03/04/2018 example.com/btc-update</small>
+                                 </p>
+                              </div>
+                           </div>
+                        </a>
+                        <a href="#" class="list-group-item">
+                           <div class="media">
+                              <div class="media-body">
+                                 <small class="pull-right">2h</small>
+                                 <strong class="media-heading text-primary">Franky</strong>
+                                 <p><small>Posted by Franky@example</small></p>
+                                 <p class="mb-sm">
+                                    <small>Vote for your favorite coin to be added example.com/vote-coin</small>
+                                 </p>
+                              </div>
+                           </div>
+                        </a>
+                     </div>
+                     <div class="panel-footer clearfix">
+                        <a href="#" class="pull-left">
                            <small>Read All</small>
-                           </a>
-                           <a href="#" class="pull-right">
+                        </a>
+                        <a href="#" class="pull-right">
                            <small>Dismiss All</small>
-                           </a>
-                        </div>
-                        <div class="panel-footer clearfix">
-                           <p>Upcoming News</p>
-                        </div>
+                        </a>
                      </div>
                   </div>
                </div>
-               
-               
-            </section>
+            </div>
+
+
          </section>
       </section>
-      <script src="plugins/jquery/jquery.js"></script>
-      <script src="plugins/bootstrap/js/bootstrap.js"></script>
-      <script src="plugins/chosen/chosen.jquery.js"></script>
-      <script src="plugins/velocity/velocity.js"></script>
-      <script src="plugins/velocity/velocity.ui.js"></script>
-      <script src="plugins/slider/js/bootstrap-slider.js"></script>
-      <script src="plugins/filestyle/bootstrap-filestyle.js"></script>
-      <script src="plugins/animo/animo.js"></script>
-      <script src="plugins/sparklines/jquery.sparkline.js"></script>
-      <script src="plugins/slimscroll/jquery.slimscroll.js"></script>
-      <script src="plugins/datatable/media/js/jquery.dataTables.js"></script>
-      <script src="plugins/datatable/extensions/datatable-bootstrap/js/dataTables.bootstrap.js"></script>
-      <script src="plugins/datatable/extensions/datatable-bootstrap/js/dataTables.bootstrapPagination.js"></script>
-      <script src="plugins/datatable/extensions/ColVis/js/dataTables.colVis.js"></script>
-      <script src="tradify/highcharts.js"></script>
-      <script src="tradify/exporting.js"></script>
-      <script src="plugins/datatable/extensions/ColVis/js/dataTables.colVis.js"></script>
-      <!--[if lt IE 8]><script src="js/excanvas.min.js"></script><![endif]-->
-      <script src="app/js/tradify.js"></script>
-      <script>
-         $(document).ready(function() {
-            // Candlestick
-            $.getJSON('tradify/data.json', function (data) {
+   </section>
+   <script src="plugins/jquery/jquery.js"></script>
+   <script src="plugins/bootstrap/js/bootstrap.js"></script>
+   <script src="plugins/chosen/chosen.jquery.js"></script>
+   <script src="plugins/velocity/velocity.js"></script>
+   <script src="plugins/velocity/velocity.ui.js"></script>
+   <script src="plugins/slider/js/bootstrap-slider.js"></script>
+   <script src="plugins/filestyle/bootstrap-filestyle.js"></script>
+   <script src="plugins/animo/animo.js"></script>
+   <script src="plugins/sparklines/jquery.sparkline.js"></script>
+   <script src="plugins/slimscroll/jquery.slimscroll.js"></script>
+   <script src="plugins/datatable/media/js/jquery.dataTables.js"></script>
+   <script src="plugins/datatable/extensions/datatable-bootstrap/js/dataTables.bootstrap.js"></script>
+   <script src="plugins/datatable/extensions/datatable-bootstrap/js/dataTables.bootstrapPagination.js"></script>
+   <script src="plugins/datatable/extensions/ColVis/js/dataTables.colVis.js"></script>
+   <script src="tradify/highcharts.js"></script>
+   <script src="tradify/exporting.js"></script>
+   <script src="plugins/datatable/extensions/ColVis/js/dataTables.colVis.js"></script>
+   <!--[if lt IE 8]><script src="js/excanvas.min.js"></script><![endif]-->
+   <script src="app/js/tradify.js"></script>
+   <script>
+      $(document).ready(function () {
+         // Candlestick
+         $.getJSON('tradify/data.json', function (data) {
 
-                // create the chart
-                Highcharts.stockChart('candlestickChart', {
+            // create the chart
+            Highcharts.stockChart('candlestickChart', {
 
-                  chart: {
-                },
+               chart: {
+               },
 
 
-                    rangeSelector: {
-                        selected: 1
-                    },
+               rangeSelector: {
+                  selected: 1
+               },
 
-                    series: [{
-                        type: 'candlestick',
-                        name: 'SC-BTC',
-                        data: data,
-                        dataGrouping: {
-                            units: [
-                                [
-                                    'week', // unit name
-                                    [1] // allowed multiples
-                                ], [
-                                    'month',
-                                    [1, 2, 3, 4, 6]
-                                ]
-                            ]
-                        }
-                    }]
-                });
+               series: [{
+                  type: 'candlestick',
+                  name: 'SC-BTC',
+                  data: data,
+                  dataGrouping: {
+                     units: [
+                        [
+                           'week', // unit name
+                           [1] // allowed multiples
+                        ], [
+                           'month',
+                           [1, 2, 3, 4, 6]
+                        ]
+                     ]
+                  }
+               }]
             });
-            });
-      </script>
-   </body>
+         });
+      });
+   </script>
+</body>
+
 </html>

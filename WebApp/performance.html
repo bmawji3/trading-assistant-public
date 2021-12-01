@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+   <meta content="Responsive Bootstrap Multi-Purpose Crypto Trading User Interface" name="description" />
+   <meta name="keywords"
+      content="crypto, Bootstrap, bitcoins, ethereum, dogecoin, iota, ripple, siacoin, exchange, trading platform, crypto trading">
+   <meta name="author" content="">
+   <title>Tradify - Responsive Crypto/Stock Trading User Interface</title>
+   <link rel="stylesheet" href="app/css/bootstrap.css">
+   <link rel="stylesheet" href="plugins/fontawesome/css/font-awesome.css">
+   <link rel="stylesheet" href="plugins/animo/animate%2banimo.css">
+   <link rel="stylesheet" href="plugins/csspinner/csspinner.min.css">
+   <link rel="stylesheet" href="app/css/app.css">
+   <script src="plugins/modernizr/modernizr.js" type="application/javascript"></script>
+   <script src="plugins/fastclick/fastclick.js" type="application/javascript"></script>
+</head>
+
+<body>
+   <section class="wrapperFullWidth">
+
+      <nav class="navbar navbar-default navbar-top navbar-fixed-top">
+         <div class="navbar-header">
+            <a href="#" class="navbar-brand">
+               <div class="brand-logo">r/wallstreetbets TA</div>
+            </a>
+         </div>
+         <div class="nav-wrapper">
+            <ul class="nav navbar-nav mt0">
+               <li class="dropdown dropdown-list">
+                  <a href="index.html" data-toggle="dropdown" data-play="fadeIn" class="dropdown-toggle">
+                     <strong><i class="fa fa-file-text-o "></i> Paper Assistant</strong>
+                  </a>
+               </li>
+               <li class="dropdown dropdown-list">
+                  <a href="#" data-toggle="dropdown" data-play="fadeIn" class="dropdown-toggle">
+                     <strong><i class="fa fa-play"></i> Live Assitant</strong>
+                  </a>
+               </li>
+               <li class="dropdown dropdown-list">
+                  <a href="performance.html" data-toggle="dropdown" data-play="fadeIn" class="dropdown-toggle">
+                     <strong><i class="fa fa-tachometer"></i> Performance</strong>
+                  </a>
+               </li>
+            </ul>
+         </div>
+      </nav>
+      <section>
+         <section class="main-content">
+            <!-- Live Coin Price -->
+            <div class="row">
+               <div class="col-lg-12">
+                  <div class="panel panel-default">
+                     <div class="panel-collapse">
+                        <div class="panel-body">
+                           <!-- Table Starts Here -->
+                           <section class="main-content">
+                              <h3>Paper Trading Stocks Performance
+                                 <br>
+                                 <small>Market Capital With Gainers OR Loosers</small>
+                              </h3>
+                              <div class="row">
+                                 <div class="col-lg-12">
+                                    <div class="panel panel-default">
+                                       <div class="panel-heading">Current Coin Prices |
+                                          <small>With Market Capital</small>
+                                       </div>
+
+                                       <div class="panel-body">
+                                          <table id="RealTimeCryptoPricing" class="table table-striped table-hover">
+                                             <thead>
+                                                <tr>
+                                                   <th>#</th>
+                                                   <th>Name</th>
+                                                   <th>Market Cap</th>
+                                                   <th>Price</th>
+                                                   <th>24hour VWAP</th>
+                                                   <th>Available Supply</th>
+                                                   <th>24hour Volume</th>
+                                                   <th>%24hr</th>
+                                                </tr>
+                                             </thead>
+                                             <tbody></tbody>
+                                             <tfoot>
+                                                <tr>
+                                                   <th>#</th>
+                                                   <th>Name</th>
+                                                   <th>Market Cap</th>
+                                                   <th>Price</th>
+                                                   <th>24hour VWAP</th>
+                                                   <th>Available Supply</th>
+                                                   <th>24hour Volume</th>
+                                                   <th>%24hr</th>
+                                                </tr>
+                                             </tfoot>
+                                          </table>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </section>
+                           <!-- Table Ends Here -->
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </section>
+      </section>
+   </section>
+   <script src="plugins/jquery/jquery.js"></script>
+   <script src="plugins/bootstrap/js/bootstrap.js"></script>
+   <script src="plugins/chosen/chosen.jquery.js"></script>
+   <script src="plugins/slider/js/bootstrap-slider.js"></script>
+   <script src="plugins/filestyle/bootstrap-filestyle.js"></script>
+   <script src="plugins/animo/animo.js"></script>
+   <!--[if lt IE 8]><script src="js/excanvas.min.js"></script><![endif]-->
+   <script src="app/js/tradify.js"></script>
+
+   <link rel='stylesheet' href='js/libs/semantic-ui/semantic.min20fd.css?ver=4.9.2' type='text/css' media='all' />
+   <link rel='stylesheet' href='js/libs/datatables.net/dataTables.semanticui.min20fd.css?ver=4.9.2' type='text/css'
+      media='all' />
+   <script type='text/javascript' src='js/bower_components/qrcode.js/qrcode.js'></script>
+   <script type='text/javascript' src='js/bower_components/select2/dist/js/select2.min.js'></script>
+
+   <script type='text/javascript' src='js/libs/moment/moment.min.js'></script>
+   <script type='text/javascript' src='js/libs/chart.js/chart.bundle.min.js'></script>
+   <script type='text/javascript' src='js/libs/socket.io/socket.io.js'></script>
+   <script type='text/javascript' src='js/libs/semantic-ui/semantic.min.js'></script>
+   <script type='text/javascript' src='js/libs/jquery-number/jquery.number.min.js'></script>
+   <script type='text/javascript' src='js/libs/datatables.net/jquery.dataTables.min.js'></script>
+   <script type='text/javascript' src='js/libs/datatables.net/dataTables.semanticui.min.js'></script>
+   <script type='text/javascript' src='js/main.js'></script>
+</body>
+
+</html>
