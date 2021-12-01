@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from trading_assistant_app import app as ta
 import pandas as pd
 
 app = Flask(__name__)
@@ -12,7 +13,7 @@ parser.add_argument('date')
 class Ticker(Resource):
      def get(self, ticker_id):
         ## Returns dictionary of stock data
-        data = pd.read_csv(f'../app/data/{ticker_id}.csv')  # read CSV
+        data = pd.read_csv(f'trading_assistant_app/data/{ticker_id}.csv')  # read CSV
         data = data.to_dict()  # convert dataframe to dictionary
         return {'data': data}, 200 
 
@@ -22,8 +23,8 @@ class DailyStocks(Resource):
 
         args = parser.parse_args()
         date = args['date']
-
-        return {'data': ''}, 200 
+        predicted_stocks = ta.get_list_of_predicted_stocks(0.003, date)
+        return {'data': predicted_stocks}, 200
 
 class Indicators(Resource):
      def get(self, ticker_id):
@@ -33,7 +34,6 @@ class Indicators(Resource):
         date = args['date']
 
         return {'data': ''}, 200 
-
 
 
 api.add_resource(Ticker, '/ticker/<string:ticker_id>') 

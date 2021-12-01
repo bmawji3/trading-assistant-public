@@ -5,10 +5,10 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
-from ImportSecurities import *
-from utils.aws_util import *
-from utils.data_util import *
-from utils.indicators import *
+from .ImportSecurities import *
+from .utils.aws_util import *
+from .utils.data_util import *
+from .utils.indicators import *
 
 
 def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
@@ -18,7 +18,7 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
     # prices_normed = normalize(prices_df)
 
     for symbol in symbols:
-        stock_data = get_ohlcv(symbol, dates, base_dir='data')
+        stock_data = get_ohlcv(symbol, dates, base_dir='trading_assistant_app/data')
         sma_symbol = sma(stock_data, window=5)
         ema_symbol = ema(stock_data, window=5)
         vama_symbol = vama(stock_data, window=5)
@@ -140,7 +140,7 @@ def get_list_of_predicted_stocks(percent_gain, given_date, debug=False):
     buy_signal_recognized_list = list()
     empty_df_count = 0
     cwd = os.getcwd()
-    data_directory = os.path.join(cwd, 'data')
+    data_directory = os.path.join(cwd, 'trading_assistant_app', 'data')
     files = [f for f in os.listdir(data_directory) if f.endswith('.csv')]
     symbols = [symbol.split('.csv')[0] for symbol in files]
     start_date = dt.datetime(2011, 11, 1)
