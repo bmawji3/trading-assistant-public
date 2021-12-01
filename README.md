@@ -7,6 +7,15 @@ The folder is self contained and has all the necessary libraries. To run it loca
 
 e.g. use ```python3 -m http.server```
 
+
+**Web App**
+
+Flask API to get stock data, techincal indicators and daily trading opportunities. 
+The web app will use this API to display information and save user session data.
+
+e.g. use ```cd WebAPI && python API.py```
+
+
 **Download CSV & Upload to S3**
 
 1. Navigate to app/
