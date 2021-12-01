@@ -136,43 +136,53 @@ def gather_download_data(sd, ed, download_new_data=False):
         gather_data(symbols_array, spaces_array, sd=sd, ed=ed)
 
 
-if __name__ == '__main__':
-    debug = False
+def get_list_of_predicted_stocks(percent_gain, given_date, debug=False):
     buy_signal_recognized_list = list()
     empty_df_count = 0
-    percent_gain = 0.00001
-    start_time = dt.datetime.now()
-    # import_function()  # Gathers data for S&P 500 Stocks
     cwd = os.getcwd()
     data_directory = os.path.join(cwd, 'data')
     files = [f for f in os.listdir(data_directory) if f.endswith('.csv')]
     symbols = [symbol.split('.csv')[0] for symbol in files]
     start_date = dt.datetime(2011, 11, 1)
     end_date = dt.date.today()
-    # gather_download_data(start_date, end_date, True)  # Gathers data for Custom stocks in symbols_config.json
     df_array = prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=percent_gain)
     for symbol, df in zip(symbols, df_array):
-        if debug:
-            print('-' * len(str(symbol)))
-            print(symbol)
-            print('-' * len(str(symbol)))
-            print()
         if len(df) == 0:
             empty_df_count += 1
             continue
         df_prediction = train_model(df, symbol, debug=debug)
-        if df_prediction[f'Y_{symbol}'].tail(1).values[0] == 1:
-            buy_signal_recognized_list.append(symbol)
-        if debug:
-            print()
+        try:
+            if df_prediction[f'Y_{symbol}'][given_date] == 1:
+                buy_signal_recognized_list.append(symbol)
+        except KeyError as e:
+            print(f'Invalid given_date index/key for {e}')
+
+    return {
+        'buy_signal_recognized_list': buy_signal_recognized_list,
+        'len_files': len(files),
+        'empty_df_count': empty_df_count
+    }
+
+
+if __name__ == '__main__':
+    debug = False
+    percent_gain = 0.003
+    requested_date = '2021-11-24'
+    start_time = dt.datetime.now()
+    # import_function()  # Gathers data for S&P 500 Stocks
+    # gather_download_data(start_date, end_date, True)  # Gathers data for Custom stocks in symbols_config.json
+    predicted_stocks_dictionary = get_list_of_predicted_stocks(percent_gain, requested_date)
+    buy_signal_recognized_list = predicted_stocks_dictionary['buy_signal_recognized_list']
+    len_files = predicted_stocks_dictionary['len_files']
+    empty_df_count = predicted_stocks_dictionary['empty_df_count']
     end_time = dt.datetime.now()
 
     print(f'--------------------------------------------')
     print('STATS')
     print(f'Time taken: {end_time - start_time}')
-    print(f'Number of Stock Symbols Recognized: {len(buy_signal_recognized_list)}/{len(files) - empty_df_count}')
+    print(f'Number of Stock Symbols Recognized: {len(buy_signal_recognized_list)}/{len_files - empty_df_count}')
     print()
     print('RESULTS')
-    print(f'For date {end_date}, the following are good stocks with an estimated percent gain {percent_gain}%')
+    print(f'For date {requested_date}, the following are good stocks with an estimated percent gain {percent_gain}%')
     [print(stock) for stock in buy_signal_recognized_list]
     print(f'--------------------------------------------')
