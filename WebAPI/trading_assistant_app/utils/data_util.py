@@ -4,6 +4,7 @@ import yfinance as yf
 import pandas as pd
 from pandas import DatetimeIndex
 import matplotlib.pyplot as plt
+import datetime as dt
 
 
 def gather_data(symbols_array, spaces_array, sd, ed):
@@ -22,12 +23,13 @@ def get_filepath(symbol: str, base_dir: str = None) -> str:
     """
 
     if base_dir is None:
-        base_dir = os.environ.get("MARKET_DATA_DIR", "../data/")
+        cwd = os.getcwd()
+        base_dir = os.path.join(cwd, 'data')
     return os.path.join(base_dir, "{}.csv".format(symbol))
 
 
-def get_closings(symbols: list, dates: DatetimeIndex, adj_close_col_name: str = "Adj Close",
-                 base_dir=None) -> DataFrame:
+def get_closing(symbols: list, dates: DatetimeIndex, adj_close_col_name: str = "Adj Close",
+                base_dir=None) -> DataFrame:
     """Read stock data (adjusted close) for given symbols from downloaded CSV files.
     :param symbols: list of symbols to read from CSV files
     :param dates: dates for the data retrieval
@@ -57,41 +59,53 @@ def get_closings(symbols: list, dates: DatetimeIndex, adj_close_col_name: str = 
 
     if "SPY" not in symbols and symbols != []:
         closings = closings.drop("SPY", axis=1)  # remove SPY as it was only needed for trading days
-    
+
     closings.ffill(inplace=True)  # first forward fill prices
     closings.bfill(inplace=True)  # second backward fill prices
 
     return closings
 
-def get_ohlcv(symbol: str, dates: DatetimeIndex, base_dir=None) -> DataFrame:
+
+def get_ohlcv(symbol: str, start_date: dt.datetime, end_date: dt.datetime, base_dir=None) -> DataFrame:
     """Ensures stock data match days where SPY traded and fills any missing data.
     Returns dataframe with ["open", "high", "low", "close","volume"]
     :param symbol: Stock symbol
-    :param dates: Dates of stock data to clean
+    :param start_date: Start date of stock data to clean
+    :param end_date: End date of stock
     :param base_dir: Base directory from where to read data
     """
-    SPY_adj_close = get_closings(symbols=[], dates=dates, base_dir=base_dir)
+    # SPY_adj_close = get_closings(symbols=[], dates=dates, base_dir=base_dir)
+    SPY_filepath = get_filepath("SPY")
+    SPY_adj_close = pd.read_csv(get_filepath("SPY"),
+                                index_col="Date",
+                                parse_dates=True,
+                                usecols=["Date", "Adj Close"],
+                                na_values=["nan"])
 
-    temp_data = pd.read_csv(get_filepath(symbol, base_dir=base_dir),
-                            index_col="Date", parse_dates=True, na_values=["nan"])
+    temp_data = pd.read_csv(get_filepath(symbol),
+                            index_col="Date",
+                            parse_dates=True,
+                            na_values=["nan"])
     ohlcv = pd.merge(SPY_adj_close, temp_data, how="inner", left_index=True, right_index=True)
-    ohlcv = ohlcv.drop(["SPY","Adj Close"], axis=1)
+    ohlcv = ohlcv.drop(["Adj Close_x", "Close"], axis=1)
+    ohlv = ohlcv.sort_values(by="Date")
     ohlcv.ffill(inplace=True)
     ohlcv.bfill(inplace=True)
     ohlcv.columns = ["open", "high", "low", "close", "volume"]
 
-    return ohlcv
+    return ohlcv.loc[start_date:end_date]
+
 
 def normalize(data: DataFrame) -> DataFrame:
     """Normalize a given dataframe
     :param data: DataFrame to be normalized.
     """
-    return data/data.iloc[0]
+    return data / data.iloc[0]
 
 
 def plot_data(prices: DataFrame, title: str = "Stock prices", xlabel: str = "Date", ylabel: str = "Price") -> None:
-    """Plot stock prices with a custom title and meaningful axis labels."""	  	   		   	 		  		  		    	 		 		   		 		  
+    """Plot stock prices with a custom title and meaningful axis labels."""
     ax = prices.plot(title=title, fontsize=12)
-    ax.set_xlabel(xlabel)  		  	   		   	 		  		  		    	 		 		   		 		  
-    ax.set_ylabel(ylabel)  		  	   		   	 		  		  		    	 		 		   		 		  
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
     plt.show()
