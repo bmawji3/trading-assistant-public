@@ -20,7 +20,14 @@
 </head>
 
 <body>
-   
+   <!-- The Modal -->
+   <div id="day-modal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+      <span class="close" id="close-modal">&times;</span>
+      <p id="finish-message"></p>
+      </div>
+   </div>
 
    <section class="wrapperFullWidth">
 
@@ -32,31 +39,29 @@
          </div>
          <div class="nav-wrapper">
             <ul class="nav navbar-nav mt0">
-               <li class="dropdown dropdown-list">
-                  <a href="#" data-toggle="dropdown" data-play="fadeIn" class="dropdown-toggle">
-                     <strong><i class="fa fa-file-text-o "></i> Paper Assistant</strong>
-                  </a>
-               </li>
-               <li class="dropdown dropdown-list">
-                  <a href="performance.html" data-toggle="dropdown" data-play="fadeIn" class="dropdown-toggle">
-                     <strong><i class="fa fa-tachometer"></i> Performance</strong>
-                  </a>
-               </li>
+               
+               
             </ul>
          </div>
       </nav>
       <section>
          <section class="main-content">
+            <button type="button" class="btn btn-labeled btn-primary pull-right" id="finish-button">
+               <span class="btn-label">
+                  <i class="fa fa-dollar"></i>
+               </span>Finish Trading Day
+            </button>
             <div class="row">
                <div class="col-md-9">
 
                   <!-- Chart Starts Here -->
                   <div class="row">
+                     <h3 id="trading-date">Trading Date: </h3>
                      <div class="col-lg-12">
                         <div class="panel panel-default">
                            <div class="panel-collapse">
                               <div class="panel-body">
-                                 <h4>ABC</h4>
+                                 <h4 id="stock-name"></h4>
                                  <div id="candlestickChart" class="h-300">
 
                                  </div>
@@ -73,9 +78,9 @@
                               <div class="row row-table row-flush">
                                  <div class="col-xs-12">
                                     <p class="mb0"><em class="fa fa-money"></em> Buying Power</p>
-                                    <h4 class="m0">$100,000</h4>
-                                    <span class="f-left m-t-10">
-                                    0$ allocated on this stock
+                                    <h4 class="m0" id="buying-power">$100,000</h4>
+                                    <span class="f-left m-t-10" id="shares-display">
+                                    Shares: 0 ($0)
                                     </span>
                                  </div>
                               </div>
@@ -91,26 +96,25 @@
                               <div class="col-md-4">
                                  <div class="input-group">
                                     <span class="input-group-addon">$</span>
-                                    <input type="number" min="1" step="any" class="form-control">
+                                    <input class="form-control" id="buy-input">
                                     <span class="input-group-btn">
-                                       <button type="button" class="btn btn-success">Buy</button>
+                                       <button type="button" class="btn btn-success" id="buy-button">Buy</button>
                                     </span>
                                  </div>
                               </div>
                               <div class="col-md-4">
                                  <div class="input-group">
                                     <span class="input-group-addon">$</span>
-                                    <input type="number" min="1" step="any" class="form-control">
+                                    <input class="form-control" id="sell-input">
                                     <span class="input-group-btn">
-                                       <button type="button" class="btn btn-danger">Sell</button>
+                                       <button type="button" class="btn btn-danger" id="sell-button">Sell</button>
                                     </span>
                                  </div>
                               </div>
                               <div class="col-md-2">
-                                 <button type="button" class="btn btn-primary">Hold</button>
                               </div>
                               <div class="col-md-2">
-                                 <button type="button" class="btn btn-inverse">Skip</button>
+                                 <button type="button" class="btn btn-inverse" id="skip-button">Next</button>
                               </div>
                            </div>
                         </div>
@@ -125,41 +129,7 @@
                      <div class="panel-heading">
                         <div class="panel-title">Social Metrics</div>
                      </div>
-                     <div class="list-group">
-                        <div class="list-group-item">
-                           <div class="media">
-                              <div class="pull-left">
-                                 <span class="fa-stack fa-lg">
-                                    <em class="fa fa-circle fa-stack-2x text-green"></em>
-                                    <em class="fa fa-level-up fa-stack-1x fa-inverse text-white"></em>
-                                 </span>
-                              </div>
-                              <div class="media-body clearfix">
-                                 <strong>Metric 1</strong>
-                                 <p class="m0">
-                                    <small class="text-green">$0.02 <i class="fa fa-money"></i></small>
-                                 </p>
-                                 <p><i class="fa fa-btc"></i> 0.00000286</p>
-                              </div>
-                           </div>
-                        </div>
-                        <div class="list-group-item">
-                           <div class="media">
-                              <div class="pull-left">
-                                 <span class="fa-stack fa-lg">
-                                    <em class="fa fa-circle fa-stack-2x text-green"></em>
-                                    <em class="fa fa-level-up fa-stack-1x fa-inverse text-white"></em>
-                                 </span>
-                              </div>
-                              <div class="media-body clearfix">
-                                 <strong>Metric 2</strong>
-                                 <p class="m0">
-                                    <small class="text-green">+1.35%</small>
-                                 </p>
-                                 <p><i class="fa fa-plus"></i> Gainer <i class="fa fa-level-up text-green"></i></p>
-                              </div>
-                           </div>
-                        </div>
+                     <div class="list-group">                       
                         <div class="list-group-item">
                            <div class="media">
                               <div class="pull-left">
@@ -178,77 +148,28 @@
                               </div>
                            </div>
                         </div>
-                        <div class="list-group-item">
-                           <div class="media">
-                              <div class="pull-left">
-                                 <span class="fa-stack fa-lg">
-                                    <em class="fa fa-circle fa-stack-2x text-green"></em>
-                                    <em class="fa fa-level-up fa-stack-1x fa-inverse text-white"></em>
-                                 </span>
-                              </div>
-                              <div class="media-body clearfix">
-                                 <strong>Metric 4</strong>
-                                 <p class="m0">
-                                    <small class="text-green">$0.02</small>
-                                 </p>
-                                 <p><i class="fa fa-btc"></i> 0.00000261 <i class="fa fa-level-up text-green"></i></p>
-                              </div>
-                           </div>
-                        </div>
+                        
                      </div>
                   </div>
                   <!-- Coin Status Ends Here -->
                   <div class="panel panel-default">
                      <div class="panel-heading">
                         <div class="pull-right"><i class="fa fa-bullhorn"></i></div>
-                        <div class="panel-title">Relevant News</div>
+                        <div class="panel-title">Portfolio</div>
                      </div>
-                     <div class="list-group">
-                        <a href="#" class="list-group-item">
-                           <div class="media">
-                              <div class="media-body">
-                                 <small class="pull-right">2h</small>
-                                 <strong class="media-heading text-primary">James</strong>
-                                 <p><small>Posted by James@example</small></p>
-                                 <p class="mb-sm">
-                                    <small>We are adding iota coins read full notice example.com/adding-iota</small>
-                                 </p>
-                              </div>
-                           </div>
-                        </a>
-                        <a href="#" class="list-group-item">
-                           <div class="media">
-                              <div class="media-body">
-                                 <small class="pull-right">2h</small>
-                                 <strong class="media-heading text-primary">Jimmy</strong>
-                                 <p><small>Posted by Jimmy@example</small></p>
-                                 <p class="mb-sm">
-                                    <small>We have scheduled update for BTC on 03/04/2018 example.com/btc-update</small>
-                                 </p>
-                              </div>
-                           </div>
-                        </a>
-                        <a href="#" class="list-group-item">
-                           <div class="media">
-                              <div class="media-body">
-                                 <small class="pull-right">2h</small>
-                                 <strong class="media-heading text-primary">Franky</strong>
-                                 <p><small>Posted by Franky@example</small></p>
-                                 <p class="mb-sm">
-                                    <small>Vote for your favorite coin to be added example.com/vote-coin</small>
-                                 </p>
-                              </div>
-                           </div>
-                        </a>
-                     </div>
-                     <div class="panel-footer clearfix">
-                        <a href="#" class="pull-left">
-                           <small>Read All</small>
-                        </a>
-                        <a href="#" class="pull-right">
-                           <small>Dismiss All</small>
-                        </a>
-                     </div>
+                     <table  class="table table-striped table-hover">
+                        <thead>
+                           <tr>
+                              <th>Ticker</th>
+                              <th>Price</th>
+                              <th>Shares</th>
+                              <th>Market Value</th>
+                           </tr>
+                        </thead>
+                        <tbody id="portfolio-table">
+
+                        </tbody>
+                     </table>
                   </div>
                </div>
             </div>
@@ -257,6 +178,8 @@
          </section>
       </section>
    </section>
+   
+
    <script src="plugins/jquery/jquery.js"></script>
    <script src="plugins/bootstrap/js/bootstrap.js"></script>
    <script src="plugins/chosen/chosen.jquery.js"></script>
@@ -277,39 +200,368 @@
    <!--[if lt IE 8]><script src="js/excanvas.min.js"></script><![endif]-->
    <script src="app/js/tradify.js"></script>
    <script>
-      $(document).ready(function () {
-         // Candlestick
-         $.getJSON('tradify/data.json', function (data) {
+      
+      // initialize global variables
+      var tradingDays = ["2021-11-12","2021-11-15","2021-11-16","2021-11-17","2021-11-18","2021-11-19"]
+      var currentDate = 0
+      var stockList = []
+      var page = 0
 
-            // create the chart
-            Highcharts.stockChart('candlestickChart', {
+      var buyingPower = 100000
+      var portfolio = {}
+      var stockData = {} // Hold current stock ohlcv
 
-               chart: {
+      function plotStockData(ticker, data){ 
+         
+         $("#stock-name").html(ticker);
+
+         // format data
+         var ohlc = [], volume = [], dataLength = Object.keys(data.Date).length
+
+         for (i = 0; i < dataLength; i += 1) {
+            date = new Date(data.Date[i]).getTime()
+
+            if(date > new Date("2021-11-12").getTime()) continue
+
+            ohlc.push([
+                  date, // the date
+                  Math.round(data.Open[i] * 100) / 100, // open
+                  Math.round(data.High[i] * 100) / 100, // high
+                  Math.round(data.Low[i] * 100) / 100, // low
+                  Math.round(data.Close[i] * 100) / 100 // close
+            ]);
+
+            volume.push([
+                  date, // the date
+                  data.Volume[i] // the volume
+            ]);
+         }
+         
+         // set the allowed units for data grouping
+         groupingUnits = [[
+            'week',                         // unit name
+            [1]                             // allowed multiples
+         ], [
+            'month',
+            [1, 2, 3, 4, 6]
+         ]],
+
+         // create the chart
+         Highcharts.stockChart('candlestickChart', {
+
+            chart: {
+            },
+            
+            yAxis: [{
+               labels: {
+                  align: 'right',
+                  x: -3
                },
-
-
-               rangeSelector: {
-                  selected: 1
+               title: {
+                  text: 'OHLC'
                },
+               height: '60%',
+               lineWidth: 2,
+               resize: {
+                  enabled: true
+               }
+            }, {
+               labels: {
+                  align: 'right',
+                  x: -3
+               },
+               title: {
+                  text: 'Volume'
+               },
+               top: '65%',
+               height: '35%',
+               offset: 0,
+               lineWidth: 2
+            }],
 
-               series: [{
-                  type: 'candlestick',
-                  name: 'SC-BTC',
-                  data: data,
-                  dataGrouping: {
-                     units: [
-                        [
-                           'week', // unit name
-                           [1] // allowed multiples
-                        ], [
-                           'month',
-                           [1, 2, 3, 4, 6]
-                        ]
-                     ]
-                  }
-               }]
-            });
+            rangeSelector: {
+               selected: 1
+            },
+            series: [{
+               type: 'candlestick',
+               name: ticker,
+               data: ohlc,
+               dataGrouping: {
+                  units: groupingUnits
+               }
+            }, {
+               type: 'column',
+               name: 'Volume',
+               data: volume,
+               yAxis: 1,
+               dataGrouping: {
+                  units: groupingUnits
+               }
+            }]
          });
+      }
+
+      function updatePortfolioDisplay(){
+         $("#portfolio-table").html(`
+         ${Object.keys(portfolio).map(key => {
+            currentPrice = portfolio[key].data.Open[Object.keys(portfolio[key].data.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
+            return(
+               `
+               <tr>
+                  <td>${key}</td>
+                  <td>$${Math.round(currentPrice*100)/100}</td>
+                  <td>${Math.round(portfolio[key].shares * 100) / 100}</th>
+                  <td>\$${Math.round(portfolio[key].shares * currentPrice * 100) / 100}</th>
+               </tr>
+               `
+            )
+         })}
+         `)
+      }
+
+      function updateBuyingPowerDisplay(){
+         currentPrice = portfolio[ticker].data.Open[Object.keys(portfolio[ticker].data.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
+
+         $("#buying-power").html("$" + buyingPower.toLocaleString("en-US"));
+         $("#shares-display").html(`${ticker} Shares: ${Math.round(portfolio[ticker].shares * 100) / 100} (\$${Math.round(portfolio[ticker].shares * currentPrice * 100) / 100})`);
+            
+      }
+   
+      function getDailyStocks(date){
+         return fetch(`http://localhost:5000/daily_stocks?date=${date}`)
+            .then(response => response.json())
+            .then(data=>{ 
+               // Get list of stocks that can be traded on the given date
+               return data.data
+            })
+      }
+      
+      function getStockData(ticker){
+         fetch(`http://localhost:5000/ticker/${ticker}`)
+            .then((response) => response.json())
+            .then((data)=>{
+               stockData = data.data
+               plotStockData(ticker, stockData)
+               if(portfolio[ticker]){
+                  currentPrice = stockData.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
+                  $("#shares-display").html(`${ticker} Shares: ${Math.round(portfolio[ticker].shares * 100) / 100} (\$${Math.round(portfolio[ticker].shares * currentPrice * 100) / 100})`);
+               }else{
+                  $("#shares-display").html(`${ticker} Shares: 0`);
+               }
+            })
+      }
+
+   </script>
+   
+   <script>
+      $(document).ready(() => {
+         
+
+         $("#trading-date").html(`Current Date: ${tradingDays[currentDate]}`);
+         
+         getDailyStocks(tradingDays[currentDate])
+            .then((dailyStocks)=>{
+               stockList = dailyStocks
+               // Get data from the first stock
+               ticker = stockList[0]
+               getStockData(ticker)
+            })
+
+         // user buttons
+         $("#skip-button").click(() => {
+            page += 1
+            if (page >= stockList.length) page = 0
+            ticker = stockList[page]
+            getStockData(ticker)
+         });
+
+         $("#buy-button").click(() => {
+
+            // Read input
+            buyAmount = $("#buy-input").val()
+            if(buyAmount == "" || buyAmount == 0){
+               alert("Invalid buy amount")
+               return
+            }
+
+            // Parse value
+            buyAmount = parseFloat(buyAmount.replace(/,/g, ''))
+            if(buyAmount > buyingPower){
+               alert("Insufficient funds")
+               return
+            }
+
+            // Get current price and assign amount of stocks to portfolio
+            currentPrice = stockData.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
+            if(portfolio[ticker]) portfolio[ticker].shares += buyAmount/currentPrice
+            else portfolio[ticker] = {
+               shares: buyAmount/currentPrice,
+               data: stockData
+            }
+
+            // Reduce buying power
+            buyingPower -= buyAmount
+
+            // Update UI
+            $("#buy-input").val("0");
+            updatePortfolioDisplay()
+            updateBuyingPowerDisplay()
+         });
+
+         $("#sell-button").click(function() {
+
+            // Read input
+            sellAmount = $("#sell-input").val()
+            if(sellAmount == "" || sellAmount == 0){
+               alert("Invalid sell amount")
+               return
+            }
+
+            // Get current price and assign amount of stocks to portfolio
+            currentPrice = stockData.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
+            
+            // Parse value
+            sellAmount = parseFloat(sellAmount.replace(/,/g, ''))
+            if( !portfolio[ticker]  || sellAmount > (portfolio[ticker].shares * currentPrice)){
+               alert("Insufficient stocks")
+               return
+            }
+
+            portfolio[ticker].shares -= sellAmount/currentPrice
+
+            // increase buying power
+            buyingPower += sellAmount
+            $("#buying-power").html("$" + buyingPower.toLocaleString("en-US"));
+            $("#shares-display").html(`${ticker} Shares: ${Math.round(portfolio[ticker].shares * 100) / 100} (\$${Math.round(portfolio[ticker].shares * currentPrice * 100) / 100})`);
+            $("#sell-input").val("0");
+            updatePortfolioDisplay(portfolio)
+         });
+
+         
+         // thousand separators for inputs
+         $("#buy-input").on("keyup", function(event ) {                   
+            // When user select text in the document, also abort.
+            var selection = window.getSelection().toString(); 
+            if (selection !== '') {
+               return; 
+            }       
+            // When the arrow keys are pressed, abort.
+            if ($.inArray(event.keyCode, [38, 40, 37, 39]) !== -1) {
+               return; 
+            }       
+            var $this = $(this);            
+            // Get the value.
+            var input = $this.val();            
+            input = input.replace(/[\D\s\._\-]+/g, ""); 
+            input = input?parseInt(input, 10):0; 
+            $this.val(function () {
+               return (input === 0)?"":input.toLocaleString("en-US"); 
+            }); 
+         });
+         $("#sell-input").on("keyup", function(event ) {                   
+            // When user select text in the document, also abort.
+            var selection = window.getSelection().toString(); 
+            if (selection !== '') {
+               return; 
+            }       
+            // When the arrow keys are pressed, abort.
+            if ($.inArray(event.keyCode, [38, 40, 37, 39]) !== -1) {
+               return; 
+            }       
+            var $this = $(this);            
+            // Get the value.
+            var input = $this.val();            
+            input = input.replace(/[\D\s\._\-]+/g, ""); 
+            input = input?parseInt(input, 10):0; 
+            $this.val(function () {
+               return (input === 0)?"":input.toLocaleString("en-US"); 
+            }); 
+         });
+         
+
+         // When the user clicks the button, open the modal 
+         $("#finish-button").click(() =>{
+            $("#day-modal").css({display: "block"})
+            
+            currentDate += 1
+            $("#trading-date").html(`Current Date: ${tradingDays[currentDate]}`);
+            updatePortfolioDisplay(portfolio)
+
+            $("#finish-message").html(`
+               Day trading finished for ${tradingDays[currentDate -1]}.Now you will start a new day with your current portfolio:
+               <br><br>
+               New Date: ${tradingDays[currentDate]}
+               <table  class="table table-striped table-hover">
+                  <thead>
+                     <tr>
+                        <th>Ticker</th>
+                        <th>Price</th>
+                        <th>Shares</th>
+                        <th>Market Value</th>
+                        <th>Percent Change</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     ${Object.keys(portfolio).map(key => {
+                        lastPrice = portfolio[key].data.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate-1])];
+                        currentPrice = portfolio[key].data.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
+
+                        return(
+                           `
+                           <tr>
+                              <td>${key}</td>
+                              <td>$${Math.round(currentPrice*100)/100}</td>
+                              <td>${Math.round(portfolio[key].shares * 100) / 100}</th>
+                              <td>\$${Math.round(portfolio[ticker].shares * currentPrice * 100) / 100}</th>
+                              <td>${ Math.round(((currentPrice/lastPrice) - 1)*100 * 100 ) /100}%</td>
+                           </tr>
+                           `
+                        )
+                     })}
+                     
+                  </tbody>
+                  
+               </table>
+            `)
+
+            fetch(`http://localhost:5000/daily_stocks?date=${tradingDays[currentDate]}`)
+            .then(response => response.json())
+            .then(data=>{ 
+               // Get list of stocks that can be traded on the given date
+               stockList = data.data
+            })
+            .then(()=>{
+               // Get data from the first stock
+               ticker = stockList[0]
+               return fetch(`http://localhost:5000/ticker/${ticker}`)
+            })
+            .then((response) => response.json())
+            .then((data)=>{
+               stockData = data.data
+               plotStockData(ticker, stockData)
+               $("#stock-name").html(ticker);
+               if(portfolio[ticker]){
+                  currentPrice = stockData.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
+                  $("#shares-display").html(`${ticker} Shares: ${Math.round(portfolio[ticker].shares * 100) / 100} (\$${Math.round(portfolio[ticker].shares * currentPrice * 100) / 100})`);
+               }else{
+                  $("#shares-display").html(`${ticker} Shares: 0`);
+               }
+            
+            })
+         }) 
+
+         
+
+         // When the user clicks anywhere outside of the modal, close it
+         window.onclick = function(event) {
+            if (event.target == document.getElementById("day-modal")) {
+               $("#day-modal").css({display: "none"})
+            }
+         }
+
+         $("#close-modal").click(function(){
+            $("#day-modal").css({display: "none"})
+         })
       });
    </script>
 </body>

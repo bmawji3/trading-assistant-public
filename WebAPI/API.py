@@ -1,11 +1,12 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 from trading_assistant_app import app as ta
+from flask_cors import CORS
 import pandas as pd
 
 app = Flask(__name__)
 api = Api(app)
-
+cors = CORS(app)
 
 parser = reqparse.RequestParser()
 parser.add_argument('date')
