@@ -5,58 +5,81 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
-from .ImportSecurities import *
-from .utils.aws_util import *
-from .utils.data_util import *
-from .utils.indicators import *
+from ImportSecurities import *
+from utils.aws_util import *
+from utils.data_util import *
+from utils.indicators import *
 
 
 def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
-    dates = pd.date_range(start_date, end_date)
-    df_array = list()
-    # prices_df = get_closings(symbols, dates, base_dir='data')
-    # prices_normed = normalize(prices_df)
+    # df_array = list()
+
+    # initialize dictionary to hold dataframe per symbol
+    df_dict = {}
+
+    # remove the index from the list of symbols
+    if "SPY" in symbols:
+        symbols.remove("SPY")
 
     for symbol in symbols:
-        stock_data = get_ohlcv(symbol, dates, base_dir='trading_assistant_app/data')
-        sma_symbol = sma(stock_data, window=5)
-        ema_symbol = ema(stock_data, window=5)
-        vama_symbol = vama(stock_data, window=5)
-        y_columns = []
+        # get stock data for a given time
+        stock_data = get_ohlcv(symbol, start_date, end_date)
 
-        # Compile TA into joined DF & FFILL / BFILL
-        join_df = pd.concat([sma_symbol, ema_symbol, vama_symbol], axis=1)
-        join_df.ffill(inplace=True)
-        join_df.bfill(inplace=True)
-        y_df = pd.DataFrame(index=stock_data.index)
+        # calculate technical indicators
+        df_indicators = get_technical_indicators_for_symbol(stock_data)
 
-        # Calculate % change for each column
-        for column in join_df.columns:
-            y_column_name = f'Y_{column}'
-            join_df[column] = join_df[column].pct_change()
-            # Check if percentage greater than specified % gain parameter
-            y_df[y_column_name] = np.where(join_df[column] > percent_gain, 1, 0)
-            y_columns.append(y_column_name)
+        # initialize dataframe to hold indicators and signal
+        df = df_indicators.copy(deep=True)
 
-        # Sum the values where column was > % gain parameter
-        join_df['Y'] = y_df.sum(axis=1)
-        # If sum > ~50%, Then Mark as a Buy Signal, Else Not a Buy Signal
-        join_df['Y'] = np.where(join_df['Y'] > np.floor(len(y_columns) / 2), 1, 0)
-        join_df = join_df.dropna()
+        # extract closing prices
+        prices = stock_data["close"]
 
-        df_array.append(join_df)
+        # initialize signal
+        signal = prices * 0
+
+        # target holding period to realize gain
+        holding_period = 5
+
+        # buy signal == 1 when price increases by percent_gain and sell == -1 when it decreases by percent_gain
+        for i in range(prices.shape[0] - holding_period):
+            ret = (prices.iloc[i + 5] / prices.iloc[i]) - 1
+            if ret > percent_gain:
+                signal.iloc[i] = 1
+            elif ret < (-1 * percent_gain):
+                signal.iloc[i] = -1
+            else:
+                signal.iloc[i] = 0
+
+        df["signal"] = signal.values
+        # y_columns = []
+        # y_df = pd.DataFrame(index=stock_data.index)
+        #
+        # # Calculate % change for each column
+        # for column in df_indicators.columns:
+        #     y_column_name = f'Y_{column}'
+        #     df_indicators[column] = df_indicators[column].pct_change()
+        #     # Check if percentage greater than specified % gain parameter
+        #     y_df[y_column_name] = np.where(df_indicators[column] > percent_gain, 1, 0)
+        #     y_columns.append(y_column_name)
+        #
+        # # Sum the values where column was > % gain parameter
+        # df_indicators['Y'] = y_df.sum(axis=1)
+        # # If sum > ~50%, Then Mark as a Buy Signal, Else Not a Buy Signal
+        # df_indicators['Y'] = np.where(df_indicators['Y'] > np.floor(len(y_columns) / 2), 1, 0)
+        # df_indicators = df_indicators.dropna()
+
+        # df_array.append(df_indicators)
+        df_dict[symbol] = df
 
         if debug:
             print(stock_data.head(n=20), '\n')
-            print(sma_symbol.head(n=20), '\n')
-            print(ema_symbol.head(n=20), '\n')
-            print(vama_symbol.head(n=20), '\n')
-            print(join_df.head(n=20), '\n')
-            print(join_df.columns)
-            print(join_df.head(n=20), '\n')
+            print(df_indicators.head(n=20), '\n')
+            print(df_indicators.columns)
+            print(df_indicators.head(n=20), '\n')
             print(y_df.head(n=20), '\n')
 
-    return df_array
+    # return df_array
+    return df_dict
 
 
 def train_model(df, symbol, debug=False):
@@ -140,13 +163,15 @@ def get_list_of_predicted_stocks(percent_gain, given_date, debug=False):
     buy_signal_recognized_list = list()
     empty_df_count = 0
     cwd = os.getcwd()
-    data_directory = os.path.join(cwd, 'trading_assistant_app', 'data')
+    # data_directory = os.path.join(cwd, 'trading_assistant_app', 'data')
+    data_directory = os.path.join(cwd, 'data')
     files = [f for f in os.listdir(data_directory) if f.endswith('.csv')]
     symbols = [symbol.split('.csv')[0] for symbol in files]
     start_date = dt.datetime(2011, 11, 1)
     end_date = dt.date.today()
     df_array = prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=percent_gain)
 
+    # TODO make sure the logic follows the new data structure
     check_first_df = True
     check_first_df_date = False
 
@@ -214,6 +239,32 @@ def get_technical_indicators_for_date(symbol, given_date,
     }
 
 
+def get_technical_indicators_for_symbol(stock_data):
+    price_sma_5_symbol = get_price_sma(stock_data, window=5)
+    price_sma_10_symbol = get_price_sma(stock_data, window=10)
+    price_sma_20_symbol = get_price_sma(stock_data, window=20)
+    price_sma_50_symbol = get_price_sma(stock_data, window=50)
+    price_sma_200_symbol = get_price_sma(stock_data, window=200)
+    bb10_pct_symbol = get_bb_pct(stock_data, window=10)
+    bb20_pct_symbol = get_bb_pct(stock_data, window=20)
+    bb50_pct_symbol = get_bb_pct(stock_data, window=50)
+    rsi5_symbol = get_rsi(stock_data, window=5)
+    rsi10_symbol = get_rsi(stock_data, window=10)
+    macd_symbol = get_macd_signal(stock_data, signal_days=9)
+    mom_symbol = get_momentum(stock_data, window=5)
+    vama_symbol = get_vama(stock_data, window=10)
+
+    # Compile TA into joined DF & FFILL / BFILL
+    df_indicators = pd.concat([price_sma_5_symbol, price_sma_10_symbol, price_sma_20_symbol,
+                               price_sma_50_symbol, price_sma_200_symbol, bb10_pct_symbol,
+                               bb20_pct_symbol, bb50_pct_symbol, rsi5_symbol,
+                               rsi10_symbol, macd_symbol, mom_symbol, vama_symbol], axis=1)
+
+    df_indicators.fillna(0, inplace=True)
+
+    return df_indicators
+
+
 def write_predictions_to_csv(start_date, end_date, percent_gain, path, debug=False):
     date_range = pd.date_range(start_date, end_date)
     data = dict()
@@ -245,7 +296,7 @@ def read_predictions(given_date, debug=False):
 
 if __name__ == '__main__':
     debug = False
-    percent_gain = 0.003
+    percent_gain = 0.03
     path = os.path.join('trading_assistant_app', 'predictions')
     requested_date = '2021-11-24'
     start_time = dt.datetime.now()
