@@ -1,14 +1,12 @@
 import requests
 import datetime
 import pandas as pd
+import time
 
-# CALL EXAMPLE
-#test = PushShift(datetime.datetime(2021, 1, 1))
-#tickers = test.text_with_ticker()
+
 class PushShift:
 
     def __init__(self, query_date):
-        # Local Calls
         self.query_date = query_date
         self.end_date = query_date + datetime.timedelta(days=1)
         self.year_before = self.end_date.year
@@ -33,15 +31,30 @@ class PushShift:
         api_url += "size=500&sort_type=score&sort=desc&subreddit=wallstreetbets"
         api_url += "&q:not=[removed]&selftext:not=[deleted]"
         request = requests.get(api_url)
+        if str(request) != '<Response [200]>':
+            print(request)
+            time.sleep(3)
+            request = requests.get(api_url)
+            if str(request) != '<Response [200]>':
+                print('Extra Delay')
+                time.sleep(10)
+                request = requests.get(api_url)
         api_result = request.json()
         return pd.DataFrame(api_result['data'])
 
     def filter_dataset(self):
         df = self.get_pushshift_data()
-        df = df[df.link_flair_text != 'Shitpost']
-        df = df[df.link_flair_text != 'Gain']
-        df = df[df.link_flair_text != 'Loss']
-        df = df[["title", "selftext"]]
+        if df.shape[0] < 1:
+            return None
+        if 'link_flair_text' in df.columns\
+                and 'title' in df.columns\
+                and 'selftext' in df.columns:
+            df = df[df.link_flair_text != 'Shitpost']
+            df = df[df.link_flair_text != 'Gain']
+            df = df[df.link_flair_text != 'Loss']
+            df = df[["title", "selftext"]]
+        else:
+            return None
         return df
 
     def search_sp500(self):
@@ -61,7 +74,7 @@ class PushShift:
         history = pd.read_csv("sp_changes.tsv", sep="\t")
         history['Date'] = pd.to_datetime(history['Date'], format='%M%d%Y', errors='ignore')
         history = history[history.Date != '#VALUE!']
-        history['Date'] = pd.to_datetime(history['Date'])
+        history['Date'] = pd.to_datetime(history['Date'], errors='ignore')
         history = history[history.Date <= self.query_date]
 
         # Aggregate most recent add and removal dates by symbol
@@ -81,29 +94,65 @@ class PushShift:
 
     def text_with_ticker(self):
         redditor = self.filter_dataset()
+        if redditor is None:
+            return None
         sp500_scope = self.search_sp500()
         # Count ticker mentions
         mentions = {}
         for ticker in sp500_scope['Symbol']:
             ticker_mentions = 0
             for row in redditor.values:
-                if ' ' + ticker + '.' in row[0]\
-                        or ' ' + ticker + '.' in row[1]\
-                        or '$' + ticker + ' ' in row[0]\
-                        or '$' + ticker + ' ' in row[1] \
-                        or '$' + ticker + '.' in row[0] \
-                        or '$' + ticker + '.' in row[1]\
-                        or ' ' + ticker + ',' in row[0]\
-                        or ' ' + ticker + ',' in row[1]:
-                    ticker_mentions += 1
+                if type(row[1]) == str:
+                    if ' ' + ticker + '.' in row[0]\
+                            or ' ' + ticker + '.' in row[1]\
+                            or '$' + ticker + ' ' in row[0]\
+                            or '$' + ticker + ' ' in row[1]\
+                            or '$' + ticker + '.' in row[0]\
+                            or '$' + ticker + '.' in row[1]\
+                            or ' ' + ticker + ',' in row[0]\
+                            or ' ' + ticker + ',' in row[1]:
+                        ticker_mentions += 1
+                else:
+                    if ' ' + ticker + '.' in row[0]\
+                            or '$' + ticker + ' ' in row[0]\
+                            or '$' + ticker + '.' in row[0]\
+                            or ' ' + ticker + ',' in row[0]:
+                        ticker_mentions += 1
+
             mentions[ticker] = ticker_mentions
         # Sort for top return efficiency
         mentions = dict(sorted(mentions.items(), key=lambda item: item[1], reverse=True))
-        popular = {}
+        df = pd.DataFrame(columns=['Date', 'Ticker', 'wsb_volume'])
         for k, v in mentions.items():
             if v > 0:
-                popular[k] = v
-            else:
-                break
-        return popular
+                df2 = pd.DataFrame([[self.query_date, k, v]], columns=['Date', 'Ticker', 'wsb_volume'])
+                df = pd.concat([df, df2])
+        if df.size == 0:
+            return None
+        return df
 
+
+start_date = datetime.datetime(2012, 1, 31)
+end_date = datetime.datetime(2021, 12, 1)
+delta = datetime.timedelta(days=1)
+i = 0
+results = pd.DataFrame(columns=['Date', 'Ticker', 'wsb_volume'])
+while start_date <= end_date:
+    test = PushShift(start_date)
+    tickers = test.text_with_ticker()
+    if tickers is not None:
+        results = pd.concat([results, tickers])
+    else:
+        time.sleep(0.5)
+    i += 1
+    if i % 30 == 0:
+        print(start_date)
+    start_date += delta
+    time.sleep(0.5)
+
+unique_tickers = results['Ticker'].values.tolist()
+
+for ticker in unique_tickers:
+    is_ticker = results['Ticker'] == ticker
+    to_file = results[is_ticker]
+    to_file.to_csv('reddit_data/' + ticker + '_rss.csv', index=False)
