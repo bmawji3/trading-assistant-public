@@ -6,16 +6,16 @@ from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
 # Statements with "." allows for relative path importing for WebApp and WebAPI
-# from .ImportSecurities import *
-# from .utils.aws_util import *
-# from .utils.data_util import *
-# from .utils.indicators import *
+from .ImportSecurities import *
+from .utils.aws_util import *
+from .utils.data_util import *
+from .utils.indicators import *
 
 # Statements without "." should be used when running the app/main function independent of WebApp and WebAPI
-from ImportSecurities import *
-from utils.aws_util import *
-from utils.data_util import *
-from utils.indicators import *
+# from ImportSecurities import *
+# from utils.aws_util import *
+# from utils.data_util import *
+# from utils.indicators import *
 
 
 def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
@@ -115,7 +115,7 @@ def train_model(df, symbol, debug=False):
     # print('X_test\n', X_test.head(20))
     # print('y_test\n', y_test.head(20))
 
-    clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    clf = RandomForestClassifier(n_estimators=10, random_state=42)
     # Workaround to get data with NAN/INF working
     if np.any(np.isnan(X_train)) == False and \
             np.all(np.isfinite(X_train)) == True and \
@@ -343,7 +343,7 @@ def read_predictions(given_date, debug=False):
 
 if __name__ == '__main__':
     debug = False
-    percent_gain = 0.003
+    percent_gain = 0.03
     path = os.path.join('trading_assistant_app', 'predictions')
     requested_date = '2021-11-24'
     start_time = dt.datetime.now()
