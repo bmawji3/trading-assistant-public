@@ -205,6 +205,7 @@
       var currentDate = 0
       var stockList = []
       var page = 0
+      var dataLog = {}
 
       var buyingPower = 100000
       var portfolio = {}
@@ -372,7 +373,7 @@
       }
    
       function getDailyStocks(date){
-         return fetch(`http://localhost:5000/daily_stocks?date=${date}`)
+         return fetch(`http://127.0.0.1:5000/daily_stocks?date=${date}`)
             .then(response => response.json())
             .then(data=>{ 
                // Get list of stocks that can be traded on the given date
@@ -381,7 +382,7 @@
       }
       
       function getStockData(ticker){
-         fetch(`http://localhost:5000/ticker/${ticker}`)
+         fetch(`http://127.0.0.1:5000/ticker/${ticker}`)
             .then((response) => response.json())
             .then((data)=>{
                stockData = data.data
@@ -392,7 +393,7 @@
                }else{
                   $("#shares-display").html(`${ticker} Shares: 0`);
                }
-               return fetch(`http://localhost:5000/indicators/${ticker}?date=${date}`)
+               return fetch(`http://127.0.0.1:5000/indicators/${ticker}?date=${tradingDays[currentDate]}`)
             })
             .then((response) => response.json())
             .then((data) => {
@@ -530,15 +531,39 @@
 
          // When the user clicks the button, open the modal 
          $("#finish-button").click(() =>{
-
+            
             // Show day results modal
             $("#day-modal").css({display: "block"})
             
+            // Log user decisions
+            portfolioValue = Object.keys(portfolio).map(key => {
+               currentPrice = portfolio[key].data.Open[Object.keys(portfolio[key].data.Date).find(k => portfolio[key].data.Date[k] === tradingDays[currentDate])];
+               return(portfolio[key].shares * currentPrice)
+            }).reduce((pv, cv) => pv + cv, 0);
+
+            dataLog[tradingDays[currentDate]] = {
+               buyingPower: buyingPower,
+               portfolio: Object.assign({}, Object.keys(portfolio).map((key) => ({[key]: portfolio[key].shares}) )),
+               totalMarketValue: portfolioValue + buyingPower
+            }
+
+            // Start next date
             currentDate += 1
-            if(currentDate >= tradingDays.length){
+            
+
+            // finish game and save results in the server
+            if(currentDate == tradingDays.length){
+               dataLog.Total = portfolioValue + buyingPower
                $("#finish-message").html(`GAME OVER`)
+               $.ajax({
+                  type: "POST",
+                  url: `http://127.0.0.1:5000/session_log`,
+                  data: JSON.stringify(dataLog),
+                  contentType: 'application/json;charset=UTF-8'
+               })
                return
             }
+            if(currentDate > tradingDays.length) return
 
             $("#trading-date").html(`Trading Date: ${tradingDays[currentDate]}`);
             updatePortfolioDisplay()
@@ -555,8 +580,8 @@
                         <th>Ticker</th>
                         <th>Price</th>
                         <th>Shares</th>
-                        <th>Market Value</th>
                         <th>Percent Change</th>
+                        <th>Market Value</th>
                      </tr>
                   </thead>
                   <tbody>
@@ -570,14 +595,29 @@
                               <td>${key}</td>
                               <td>$${Math.round(currentPrice*100)/100}</td>
                               <td>${Math.round(portfolio[key].shares * 100) / 100}</th>
-                              <td>\$${(Math.round(portfolio[key].shares * currentPrice * 100) / 100).toLocaleString("en-US")}</th>
                               <td>${percentChange}% <i class="fa fa-level-${((percentChange > 0) ? 'up' : 'down')}" text-${((percentChange > 0) ? 'success' : 'danger')}"></i></td>
+                              <td>\$${(Math.round(portfolio[key].shares * currentPrice * 100) / 100).toLocaleString("en-US")}</th>
                            </tr>
                            `
                         )
                      })}
-                     
                   </tbody>
+                  <tfoot>
+                     <tr>
+                        <th>Buying Power</th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <th>\$${(Math.round(buyingPower * 100) / 100).toLocaleString("en-US")}</th>
+                     </tr>
+                     <tr>
+                        <th>Total</th>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <th>\$${(Math.round((buyingPower + portfolioValue) * 100) / 100).toLocaleString("en-US")}</th>
+                     </tr>
+                  </tfoot>
                   
                </table>
                <div style = "height: 50px"></div>
@@ -601,6 +641,8 @@
             $("#continue-button").click(function(){
                $("#day-modal").css({display: "none"})
             })
+
+            $("#continue-button").focus()
             
          }) 
 
