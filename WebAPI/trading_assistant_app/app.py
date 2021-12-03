@@ -117,10 +117,10 @@ def train_model(df, symbol, debug=False):
 
     clf = RandomForestClassifier(n_estimators=100, random_state=42)
     # Workaround to get data with NAN/INF working
-    if np.any(np.isnan(X_train)) != False and \
-            np.all(np.isfinite(X_train)) != True and \
-            np.any(np.isnan(y_train.values.ravel())) != False and \
-            np.all(np.isfinite(y_train.values.ravel())) != True:
+    if np.any(np.isnan(X_train)) == False and \
+            np.all(np.isfinite(X_train)) == True and \
+            np.any(np.isnan(y_train.values.ravel())) == False and \
+            np.all(np.isfinite(y_train.values.ravel())) == True:
         clf.fit(X_train, y_train.values.ravel())
         y_pred = clf.predict(X_test)
         y_test_ravel = y_test.values.ravel()
@@ -343,7 +343,7 @@ def read_predictions(given_date, debug=False):
 
 if __name__ == '__main__':
     debug = False
-    percent_gain = 0.03
+    percent_gain = 0.003
     path = os.path.join('trading_assistant_app', 'predictions')
     requested_date = '2021-11-24'
     start_time = dt.datetime.now()
@@ -361,8 +361,8 @@ if __name__ == '__main__':
     # Write predictions to CSV & Read them
     start_date = dt.datetime(2021, 11, 1)
     end_date = dt.datetime(2021, 12, 1)
-    write_predictions_to_csv(start_date, end_date, percent_gain, path)
-    pred = read_predictions(requested_date)
+    # write_predictions_to_csv(start_date, end_date, percent_gain, path)
+    # pred = read_predictions(requested_date)
     end_time = dt.datetime.now()
 
     print(f'--------------------------------------------')
