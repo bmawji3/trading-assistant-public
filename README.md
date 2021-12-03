@@ -26,12 +26,12 @@ e.g. ```cd app && python app.py```
 
 **Reddit Stock Selector**
 
-In: DateTime
-
-Out: {Ticker: Mentions} in descending order, no tickers with 0 mentions presented.
+Input a DateTime to output csv files containing date (day), ticker, and mention count in r\wallstreetbets top 500 scored submissions.
 
 e.g.
 ```
 test = PushShift(datetime.datetime(2021, 1, 1))
 tickers = test.text_with_ticker()
 ```
+Used to populate the reddit_data folder for the date range of r\wallstreetbets existence, 1-2 hours runtime on base model 2020 macbook air.
+
