@@ -111,8 +111,9 @@
                                  </div>
                               </div>
                               <div class="col-md-2">
+                                 <button type="button" class="btn btn-inverse" id="prev-button">Previous</button>
                               </div>
-                              <div class="col-md-2">
+                              <div class="col-md-1">
                                  <button type="button" class="btn btn-inverse" id="skip-button">Next</button>
                               </div>
                            </div>
@@ -193,9 +194,16 @@
    <script src="plugins/datatable/extensions/datatable-bootstrap/js/dataTables.bootstrap.js"></script>
    <script src="plugins/datatable/extensions/datatable-bootstrap/js/dataTables.bootstrapPagination.js"></script>
    <script src="plugins/datatable/extensions/ColVis/js/dataTables.colVis.js"></script>
-   <script src="tradify/highcharts.js"></script>
+   <!--<script src="tradify/highcharts.js"></script>-->
    <script src="tradify/exporting.js"></script>
    <script src="plugins/datatable/extensions/ColVis/js/dataTables.colVis.js"></script>
+
+   <script src="https://code.highcharts.com/stock/highstock.js"></script>
+   <script src="https://code.highcharts.com/stock/modules/data.js"></script>
+   <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+   <script src="https://code.highcharts.com/stock/indicators/indicators.js"></script>
+   <script src="https://code.highcharts.com/stock/indicators/bollinger-bands.js"></script>
+
    <!--[if lt IE 8]><script src="js/excanvas.min.js"></script><![endif]-->
    <script src="app/js/tradify.js"></script>
    <script>
@@ -241,7 +249,7 @@
          // set the allowed units for data grouping
          groupingUnits = [[
             'week',                         // unit name
-            [1]                             // allowed multiples
+            [2]                             // allowed multiples
          ], [
             'month',
             [1, 2, 3, 4, 6]
@@ -281,16 +289,22 @@
             }],
 
             rangeSelector: {
-               selected: 1
+               selected: 0
             },
             series: [{
                type: 'candlestick',
                name: ticker,
                data: ohlc,
+               id: ticker,
                dataGrouping: {
                   units: groupingUnits
                }
-            }, {
+            }, 
+            {
+               type: 'bb',
+               linkedTo: ticker
+            },
+            {
                type: 'column',
                name: 'Volume',
                data: volume,
@@ -377,7 +391,13 @@
             .then(response => response.json())
             .then(data=>{ 
                // Get list of stocks that can be traded on the given date
-               return data.data
+               stocks = data.data.buy_prediction
+               data.data.sell_prediction.forEach(s => {
+                  if (s in Object.keys(portfolio)){
+                     stocks.push(s)
+                  }
+               });
+               return stocks
             })
       }
       
@@ -419,6 +439,12 @@
             })
 
          // user buttons
+         $("#prev-button").click(() => {
+            page -= 1
+            if (page < 0) page = stockList.length - 1
+            ticker = stockList[page]
+            getStockData(ticker)
+         });
          $("#skip-button").click(() => {
             page += 1
             if (page >= stockList.length) page = 0
@@ -553,7 +579,7 @@
 
             // finish game and save results in the server
             if(currentDate == tradingDays.length){
-               dataLog.Total = portfolioValue + buyingPower
+               dataLog.total = portfolioValue + buyingPower
                $("#finish-message").html(`GAME OVER`)
                $.ajax({
                   type: "POST",

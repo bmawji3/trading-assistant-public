@@ -27,8 +27,12 @@ class DailyStocks(Resource):
 
         args = parser.parse_args()
         date = args['date']
-        predicted_stocks = ta.read_predictions(date)
-        return {'data': predicted_stocks}, 200
+        buy_prediction = ta.read_predictions(date, buy=True)
+        sell_prediction = ta.read_predictions(date, buy=False)
+        return {'data': {
+            'buy_prediction': buy_prediction,
+            'sell_prediction': sell_prediction
+        }}, 200
 
 class Indicators(Resource):
      def get(self, ticker_id):

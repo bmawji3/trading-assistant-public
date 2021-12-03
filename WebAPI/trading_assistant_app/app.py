@@ -346,8 +346,8 @@ def write_predictions_to_csv(start_date, end_date, percent_gain, path, debug=Fal
     df_sell.to_csv(os.path.join(path, f'sell_predictions.csv'))
 
 
-def read_predictions(given_date, debug=False):
-    df = pd.read_csv(f'trading_assistant_app/predictions/predictions.csv')
+def read_predictions(given_date, buy = True, debug=False):
+    df = pd.read_csv(f'trading_assistant_app/predictions/{"buy_predictions" if buy else "sell_predictions"}.csv')
     df = df.set_index('Date')
     try:
         symbols = df['Symbols'][given_date]
