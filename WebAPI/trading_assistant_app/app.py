@@ -6,16 +6,16 @@ from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
 # Statements with "." allows for relative path importing for WebApp and WebAPI
-from .ImportSecurities import *
-from .utils.aws_util import *
-from .utils.data_util import *
-from .utils.indicators import *
+# from .ImportSecurities import *
+# from .utils.aws_util import *
+# from .utils.data_util import *
+# from .utils.indicators import *
 
 # Statements without "." should be used when running the app/main function independent of WebApp and WebAPI
-# from ImportSecurities import *
-# from utils.aws_util import *
-# from utils.data_util import *
-# from utils.indicators import *
+from ImportSecurities import *
+from utils.aws_util import *
+from utils.data_util import *
+from utils.indicators import *
 
 
 def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
@@ -30,10 +30,24 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
 
     for symbol in symbols:
         # get stock data for a given time
-        stock_data = get_ohlcv(symbol, start_date, end_date)
+        stock_data = get_ohlcv(symbol, start_date, end_date, base_dir=os.path.join('trading_assistant_app', 'data'))
+
+        # Filter out empty OHLCV DF
+        if len(stock_data) == 0:
+            continue
 
         # calculate technical indicators
         df_indicators = get_technical_indicators_for_symbol(stock_data)
+
+        # gather reddit mention counts
+        df_reddit = pd.read_csv(os.path.join('trading_assistant_app', 'reddit_data', f'{symbol}_rss.csv'))
+        df_reddit = df_reddit.set_index('Date')
+        df_reddit.index = pd.to_datetime(df_reddit.index)
+        df_reddit = df_reddit.drop('Ticker', axis=1)
+
+        # merge and fill nan data
+        df_merged = pd.merge(df_indicators, df_reddit, how='outer', left_index=True, right_index=True)
+        df_merged[['wsb_volume']] = df_merged[['wsb_volume']].fillna(value=0.0)
 
         # initialize dataframe to hold indicators and signal
         df = df_indicators.copy(deep=True)
@@ -102,17 +116,24 @@ def train_model(df, symbol, debug=False):
     # print('y_test\n', y_test.head(20))
 
     clf = RandomForestClassifier(n_estimators=100, random_state=42)
-    clf.fit(X_train, y_train.values.ravel())
-    y_pred = clf.predict(X_test)
-    y_test_ravel = y_test.values.ravel()
-    df_y_pred = pd.DataFrame(y_pred, index=y_test.index, columns=[f'Y_{symbol}'])
+    # Workaround to get data with NAN/INF working
+    if np.any(np.isnan(X_train)) != False and \
+            np.all(np.isfinite(X_train)) != True and \
+            np.any(np.isnan(y_train.values.ravel())) != False and \
+            np.all(np.isfinite(y_train.values.ravel())) != True:
+        clf.fit(X_train, y_train.values.ravel())
+        y_pred = clf.predict(X_test)
+        y_test_ravel = y_test.values.ravel()
+        df_y_pred = pd.DataFrame(y_pred, index=y_test.index, columns=[f'Y_{symbol}'])
 
-    if debug:
-        print(f'Feature Importances: '
-              f'{sorted(list(zip(X_train, clf.feature_importances_)), key=lambda tup: tup[1], reverse=True)}')
-        print(f'Mean Absolute Error: {metrics.mean_absolute_error(y_test_ravel, y_pred)}')
-        print(f'Mean Squared Error: {metrics.mean_squared_error(y_test_ravel, y_pred)}')
-        print(f'Root Mean Squared Error: {np.sqrt(metrics.mean_squared_error(y_test_ravel, y_pred))}')
+        if debug:
+            print(f'Feature Importances: '
+                  f'{sorted(list(zip(X_train, clf.feature_importances_)), key=lambda tup: tup[1], reverse=True)}')
+            print(f'Mean Absolute Error: {metrics.mean_absolute_error(y_test_ravel, y_pred)}')
+            print(f'Mean Squared Error: {metrics.mean_squared_error(y_test_ravel, y_pred)}')
+            print(f'Root Mean Squared Error: {np.sqrt(metrics.mean_squared_error(y_test_ravel, y_pred))}')
+    else:
+        df_y_pred = pd.DataFrame(np.zeros(len(y_test)), index=y_test.index, columns=[f'Y_{symbol}'])
 
     return df_y_pred
 
@@ -168,54 +189,65 @@ def gather_download_data(sd, ed, download_new_data=False):
 
 def get_list_of_predicted_stocks(percent_gain, given_date, debug=False):
     buy_signal_recognized_list = list()
+    sell_signal_recognized_list = list()
     empty_df_count = 0
     cwd = os.getcwd()
-    # data_directory = os.path.join(cwd, 'trading_assistant_app', 'data')
-    data_directory = os.path.join(cwd, 'data')
+    data_directory = os.path.join(cwd, 'trading_assistant_app', 'data')
+    # data_directory = os.path.join(cwd, 'data')
     files = [f for f in os.listdir(data_directory) if f.endswith('.csv')]
     symbols = [symbol.split('.csv')[0] for symbol in files]
     start_date = dt.datetime(2011, 11, 1)
     end_date = dt.date.today()
-    df_array = prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=percent_gain)
+    df_dictionary = prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=percent_gain)
 
-    # TODO make sure the logic follows the new data structure
-    check_first_df = True
-    check_first_df_date = False
+    # check_first_df = True
+    # check_first_df_date = False
+    #
+    # if len(df_dictionary) >= 1:
+    #     first_df = df_dictionary[0]
+    #     if len(first_df) == 0:
+    #         check_first_df = False
+    #     if check_first_df:
+    #         try:
+    #             if first_df[f'Y'][given_date] == 1 or first_df[f'Y'][given_date] == 0:
+    #                 check_first_df_date = True
+    #         except KeyError as e:
+    #             if debug:
+    #                 print(f'Invalid given_date index/key for {e}')
+    #
+    # if not check_first_df_date:
+    #     return {
+    #         'buy_signal_recognized_list': buy_signal_recognized_list,
+    #         'len_buy_signal_list': len(buy_signal_recognized_list),
+    #         'sell_signal_recognized_list': sell_signal_recognized_list,
+    #         'len_sell_signal_list': len(sell_signal_recognized_list),
+    #         'len_files': len(files),
+    #         'empty_df_count': empty_df_count,
+    #         'given_date': given_date
+    #     }
 
-    if len(df_array) >= 1:
-        first_df = df_array[0]
-        if len(first_df) == 0:
-            check_first_df = False
-        if check_first_df:
-            try:
-                if first_df[f'Y'][given_date] == 1 or first_df[f'Y'][given_date] == 0:
-                    check_first_df_date = True
-            except KeyError as e:
-                if debug:
-                    print(f'Invalid given_date index/key for {e}')
-
-    if not check_first_df_date:
-        return {
-            'buy_signal_recognized_list': buy_signal_recognized_list,
-            'len_buy_signal_list': len(buy_signal_recognized_list),
-            'len_files': len(files),
-            'empty_df_count': empty_df_count,
-            'given_date': given_date
-        }
-
-    for symbol, df in zip(symbols, df_array):
+    for symbol, df in df_dictionary.items():
         if len(df) == 0:
+            print(f'len(df) == 0!!! for {symbol}')
             empty_df_count += 1
             continue
 
         # Train model
         df_prediction = train_model(df, symbol, debug=debug)
-        if df_prediction[f'Y_{symbol}'][given_date] == 1:
-            buy_signal_recognized_list.append(symbol)
+        try:
+            if df_prediction[f'Y_{symbol}'][given_date] == 1:
+                buy_signal_recognized_list.append(symbol)
+            elif df_prediction[f'Y_{symbol}'][given_date] == -1:
+                sell_signal_recognized_list.append(symbol)
+        except KeyError as e:
+            # print(f'Invalid given_date index/key for {e}')
+            pass
 
     return {
         'buy_signal_recognized_list': buy_signal_recognized_list,
         'len_buy_signal_list': len(buy_signal_recognized_list),
+        'sell_signal_recognized_list': sell_signal_recognized_list,
+        'len_sell_signal_list': len(sell_signal_recognized_list),
         'len_files': len(files),
         'empty_df_count': empty_df_count,
         'given_date': given_date
@@ -274,16 +306,24 @@ def get_technical_indicators_for_symbol(stock_data):
 
 def write_predictions_to_csv(start_date, end_date, percent_gain, path, debug=False):
     date_range = pd.date_range(start_date, end_date)
-    data = dict()
+    buy_data = dict()
+    sell_data = dict()
     for date in date_range:
         predictions_dictionary = get_list_of_predicted_stocks(percent_gain, date)
         buy_signal_recognized_list = predictions_dictionary['buy_signal_recognized_list']
         buy_signal_recognized_str = '_'.join(buy_signal_recognized_list)
-        data[date] = buy_signal_recognized_str
+        sell_signal_recognized_list = predictions_dictionary['sell_signal_recognized_list']
+        sell_signal_recognized_str = '_'.join(sell_signal_recognized_list)
+        buy_data[date] = buy_signal_recognized_str
+        sell_data[date] = sell_signal_recognized_str
 
-    df = pd.DataFrame(data.items(), columns=['Date', 'Symbols'])
-    df = df.set_index('Date')
-    df.to_csv(os.path.join(path, f'predictions.csv'))
+    df_buy = pd.DataFrame(buy_data.items(), columns=['Date', 'Symbols'])
+    df_buy = df_buy.set_index('Date')
+    df_buy.to_csv(os.path.join(path, f'buy_predictions.csv'))
+
+    df_sell = pd.DataFrame(sell_data.items(), columns=['Date', 'Symbols'])
+    df_sell = df_sell.set_index('Date')
+    df_sell.to_csv(os.path.join(path, f'sell_predictions.csv'))
 
 
 def read_predictions(given_date, debug=False):
@@ -307,26 +347,30 @@ if __name__ == '__main__':
     path = os.path.join('trading_assistant_app', 'predictions')
     requested_date = '2021-11-24'
     start_time = dt.datetime.now()
-    # import_function()  # Gathers data for S&P 500 Stocks
+    # Import Data Logic
+    # reddit_files = [f.split('_rss.csv')[0] for f in os.listdir('trading_assistant_app/reddit_data')]
+    # import_function(reddit_files)  # Gathers data for S&P 500 Stocks
     # gather_download_data(start_date, end_date, True)  # Gathers data for Custom stocks in symbols_config.json
-    predicted_stocks_dictionary = get_list_of_predicted_stocks(percent_gain, requested_date)
-    buy_signal_recognized_list = predicted_stocks_dictionary['buy_signal_recognized_list']
-    len_files = predicted_stocks_dictionary['len_files']
-    empty_df_count = predicted_stocks_dictionary['empty_df_count']
-    end_time = dt.datetime.now()
+
+    # Data Preparation & Prediction Logic
+    # predicted_stocks_dictionary = get_list_of_predicted_stocks(percent_gain, requested_date)
+    # buy_signal_recognized_list = predicted_stocks_dictionary['buy_signal_recognized_list']
+    # len_files = predicted_stocks_dictionary['len_files']
+    # empty_df_count = predicted_stocks_dictionary['empty_df_count']
 
     # Write predictions to CSV & Read them
-    # start_date = dt.datetime(2021, 11, 1)
-    # end_date = dt.datetime(2021, 11, 24)
-    # write_predictions_to_csv(start_date, end_date, percent_gain, path)
-    # pred = read_predictions(requested_date)
+    start_date = dt.datetime(2021, 11, 1)
+    end_date = dt.datetime(2021, 12, 1)
+    write_predictions_to_csv(start_date, end_date, percent_gain, path)
+    pred = read_predictions(requested_date)
+    end_time = dt.datetime.now()
 
     print(f'--------------------------------------------')
     print('STATS')
     print(f'Time taken: {end_time - start_time}')
-    print(f'Number of Stock Symbols Recognized: {len(buy_signal_recognized_list)}/{len_files - empty_df_count}')
-    print()
-    print('RESULTS')
-    print(f'For date {requested_date}, the following are good stocks with an estimated percent gain {percent_gain}%')
-    [print(stock) for stock in buy_signal_recognized_list]
+    # print(f'Number of Stock Symbols Recognized: {len(buy_signal_recognized_list)}/{len_files - empty_df_count}')
+    # print()
+    # print('RESULTS')
+    # print(f'For date {requested_date}, the following are good stocks with an estimated percent gain {percent_gain}%')
+    # [print(stock) for stock in buy_signal_recognized_list]
     print(f'--------------------------------------------')
