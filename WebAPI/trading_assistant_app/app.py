@@ -261,21 +261,41 @@ def get_technical_indicators_for_date(symbol,
     stock_data = get_ohlcv(symbol, start_date, end_date, base_dir='trading_assistant_app/data')
     technical_indicators = get_technical_indicators_for_symbol(stock_data)
 
-    return {
-        'Price/SMA5': technical_indicators['Price/SMA5'][given_date],
-        'Price/SMA10': technical_indicators['Price/SMA10'][given_date],
-        'Price/SMA20': technical_indicators['Price/SMA20'][given_date],
-        'Price/SMA50': technical_indicators['Price/SMA50'][given_date],
-        'Price/SMA200': technical_indicators['Price/SMA200'][given_date],
-        'BB%10': technical_indicators['BB%10'][given_date],
-        'BB%20': technical_indicators['BB%20'][given_date],
-        'BB%50': technical_indicators['BB%50'][given_date],
-        'RSI5': technical_indicators['RSI5'][given_date],
-        'RSI10': technical_indicators['RSI10'][given_date],
-        'MACD9': technical_indicators['MACD9'][given_date],
-        'MOM5': technical_indicators['MOM5'][given_date],
-        'VAMA10': technical_indicators['VAMA10'][given_date]
-    }
+    try:
+        return_dict = {
+            'Price/SMA5': technical_indicators['Price/SMA5'][given_date],
+            'Price/SMA10': technical_indicators['Price/SMA10'][given_date],
+            'Price/SMA20': technical_indicators['Price/SMA20'][given_date],
+            'Price/SMA50': technical_indicators['Price/SMA50'][given_date],
+            'Price/SMA200': technical_indicators['Price/SMA200'][given_date],
+            'BB%10': technical_indicators['BB%10'][given_date],
+            'BB%20': technical_indicators['BB%20'][given_date],
+            'BB%50': technical_indicators['BB%50'][given_date],
+            'RSI5': technical_indicators['RSI5'][given_date],
+            'RSI10': technical_indicators['RSI10'][given_date],
+            'MACD9': technical_indicators['MACD9'][given_date],
+            'MOM5': technical_indicators['MOM5'][given_date],
+            'VAMA10': technical_indicators['VAMA10'][given_date]
+        }
+    except KeyError as e:
+        print(f'Invalid given_date index/key for {e}')
+        return_dict = {
+            'Price/SMA5': 0,
+            'Price/SMA10': 0,
+            'Price/SMA20': 0,
+            'Price/SMA50': 0,
+            'Price/SMA200': 0,
+            'BB%10': 0,
+            'BB%20': 0,
+            'BB%50': 0,
+            'RSI5': 0,
+            'RSI10': 0,
+            'MACD9': 0,
+            'MOM5': 0,
+            'VAMA10': 0
+        }
+
+    return return_dict
 
 
 def get_technical_indicators_for_symbol(stock_data):
