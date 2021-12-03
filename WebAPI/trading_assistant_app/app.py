@@ -17,6 +17,7 @@ from .utils.indicators import *
 # from utils.data_util import *
 # from utils.indicators import *
 
+
 def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
     # df_array = list()
 
