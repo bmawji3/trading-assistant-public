@@ -75,14 +75,14 @@ def get_ohlcv(symbol: str, start_date: dt.datetime, end_date: dt.datetime, base_
     :param base_dir: Base directory from where to read data
     """
     # SPY_adj_close = get_closings(symbols=[], dates=dates, base_dir=base_dir)
-    SPY_filepath = get_filepath("SPY")
-    SPY_adj_close = pd.read_csv(get_filepath("SPY"),
+    SPY_filepath = get_filepath("SPY", base_dir=base_dir)
+    SPY_adj_close = pd.read_csv(get_filepath("SPY", base_dir=base_dir),
                                 index_col="Date",
                                 parse_dates=True,
                                 usecols=["Date", "Adj Close"],
                                 na_values=["nan"])
 
-    temp_data = pd.read_csv(get_filepath(symbol),
+    temp_data = pd.read_csv(get_filepath(symbol, base_dir=base_dir),
                             index_col="Date",
                             parse_dates=True,
                             na_values=["nan"])

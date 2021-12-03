@@ -5,11 +5,17 @@ import pandas as pd
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
-from ImportSecurities import *
-from utils.aws_util import *
-from utils.data_util import *
-from utils.indicators import *
+# Statements with "." allows for relative path importing for WebApp and WebAPI
+from .ImportSecurities import *
+from .utils.aws_util import *
+from .utils.data_util import *
+from .utils.indicators import *
 
+# Statements without "." should be used when running the app/main function independent of WebApp and WebAPI
+# from ImportSecurities import *
+# from utils.aws_util import *
+# from utils.data_util import *
+# from utils.indicators import *
 
 def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
     # df_array = list()
@@ -76,7 +82,7 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
             print(df_indicators.head(n=20), '\n')
             print(df_indicators.columns)
             print(df_indicators.head(n=20), '\n')
-            print(y_df.head(n=20), '\n')
+            # print(y_df.head(n=20), '\n')
 
     # return df_array
     return df_dict
@@ -215,27 +221,27 @@ def get_list_of_predicted_stocks(percent_gain, given_date, debug=False):
     }
 
 
-def get_technical_indicators_for_date(symbol, given_date,
-                                      start_date=dt.datetime(2011, 11, 1), end_date=dt.date.today()):
-    dates = pd.date_range(start_date, end_date)
-    df_array = list()
-    # prices_df = get_closings(symbols, dates, base_dir='data')
-    # prices_normed = normalize(prices_df)
-
-    stock_data = get_ohlcv(symbol, dates, base_dir='trading_assistant_app/data')
-    sma_symbol = sma(stock_data, window=5)
-    ema_symbol = ema(stock_data, window=5)
-    vama_symbol = vama(stock_data, window=5)
-
-    # Compile TA into joined DF & FFILL / BFILL
-    join_df = pd.concat([sma_symbol, ema_symbol, vama_symbol], axis=1)
-    join_df.ffill(inplace=True)
-    join_df.bfill(inplace=True)
+def get_technical_indicators_for_date(symbol,
+                                      given_date,
+                                      start_date=dt.datetime(2011, 11, 1),
+                                      end_date=dt.datetime.today()):
+    stock_data = get_ohlcv(symbol, start_date, end_date, base_dir='trading_assistant_app/data')
+    technical_indicators = get_technical_indicators_for_symbol(stock_data)
 
     return {
-        'sma': join_df['SMA5'][given_date],
-        'ema': join_df['EMA5'][given_date],
-        'vama': join_df['VAMA5'][given_date]
+        'Price/SMA5': technical_indicators['Price/SMA5'][given_date],
+        'Price/SMA10': technical_indicators['Price/SMA10'][given_date],
+        'Price/SMA20': technical_indicators['Price/SMA20'][given_date],
+        'Price/SMA50': technical_indicators['Price/SMA50'][given_date],
+        'Price/SMA200': technical_indicators['Price/SMA200'][given_date],
+        'BB%10': technical_indicators['BB%10'][given_date],
+        'BB%20': technical_indicators['BB%20'][given_date],
+        'BB%50': technical_indicators['BB%50'][given_date],
+        'RSI5': technical_indicators['RSI5'][given_date],
+        'RSI10': technical_indicators['RSI10'][given_date],
+        'MACD9': technical_indicators['MACD9'][given_date],
+        'MOM5': technical_indicators['MOM5'][given_date],
+        'VAMA10': technical_indicators['VAMA10'][given_date]
     }
 
 
