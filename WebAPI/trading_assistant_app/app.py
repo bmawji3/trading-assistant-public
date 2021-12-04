@@ -295,31 +295,6 @@ def get_wsb_volume_for_date(symbol, given_date):
     return return_dict
 
 
-def filter_reddit_count(given_date, minimum_count, buy_predictions=True):
-    # This allows for relative path retrieval for WebApp and WebAPI
-    predictions = pd.read_csv(os.path.join(f'trading_assistant_app',
-                                           f'predictions',
-                                           f'{"buy" if buy_predictions else "sell"}_predictions.csv'))
-
-    # This should be used when running the app/main function independent of WebApp and WebAPI
-    # predictions = pd.read_csv(os.path.join(f'predictions',
-    #                                        f'{"buy" if buy_predictions else "sell"}_predictions.csv'))
-
-    predictions = predictions.fillna('')
-    predictions = predictions.set_index('Date')
-    try:
-        predictions = predictions['Symbols'][given_date]
-    except KeyError as e:
-        predictions = ''
-        print(f'Invalid given_date index/key for {e}')
-
-    predictions_list = predictions.split('_')
-    filtered = filter(lambda symbol:
-                      get_wsb_volume_for_date(symbol, given_date)['wsb_volume'] > minimum_count, predictions_list)
-    filtered_list = list(filtered)
-    return filtered_list
-
-
 def get_technical_indicators_for_symbol(stock_data):
     price_sma_5_symbol = get_price_sma(stock_data, window=5)
     price_sma_10_symbol = get_price_sma(stock_data, window=10)
@@ -368,7 +343,7 @@ def write_predictions_to_csv(start_date, end_date, percent_gain, path, debug=Fal
     df_sell.to_csv(os.path.join(path, f'sell_predictions.csv'))
 
 
-def read_predictions(given_date, buy = True, debug=False):
+def read_predictions(given_date, minimum_count=0, buy=True, debug=False):
     df = pd.read_csv(f'trading_assistant_app/predictions/{"buy_predictions" if buy else "sell_predictions"}.csv')
     df = df.set_index('Date')
     try:
@@ -376,11 +351,16 @@ def read_predictions(given_date, buy = True, debug=False):
     except KeyError as e:
         print(f'Invalid given_date index/key for {e}')
         symbols = ''
+
     if isinstance(symbols, float):
         if np.isnan(symbols):
             return []
     elif isinstance(symbols, str):
-        return symbols.split('_')
+        predictions_list = symbols.split('_')
+        filtered = filter(lambda symbol:
+                          get_wsb_volume_for_date(symbol, given_date)['wsb_volume'] > minimum_count, predictions_list)
+        filtered_list = list(filtered)
+        return filtered_list
 
 
 if __name__ == '__main__':

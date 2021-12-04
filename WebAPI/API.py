@@ -27,8 +27,8 @@ class DailyStocks(Resource):
      def get(self):
         args = parser.parse_args()
         date = args['date']
-        buy_prediction = ta.read_predictions(date, buy=True)
-        sell_prediction = ta.read_predictions(date, buy=False)
+        buy_prediction = ta.read_predictions(date, minimum_count=0, buy=True)
+        sell_prediction = ta.read_predictions(date, minimum_count=0, buy=False)
         return {'data': {
             'buy_prediction': buy_prediction,
             'sell_prediction': sell_prediction
