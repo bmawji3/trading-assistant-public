@@ -268,6 +268,33 @@ def get_technical_indicators_for_date(symbol,
     return return_dict
 
 
+def get_wsb_volume_for_date(symbol, given_date):
+    # gather reddit mention counts
+    # This allows for relative path retrieval for WebApp and WebAPI
+    reddit_fp = os.path.join('trading_assistant_app', 'reddit_data', f'{symbol}_rss.csv')
+
+    # This should be used when running the app/main function independent of WebApp and WebAPI
+    # reddit_fp = os.path.join(os.getcwd(), 'reddit_data', f'{symbol}_rss.csv')
+
+    df_reddit = pd.read_csv(reddit_fp)
+    df_reddit = df_reddit.set_index('Date')
+    df_reddit.index = pd.to_datetime(df_reddit.index)
+    df_reddit = df_reddit.drop('Ticker', axis=1)
+
+    try:
+        value = df_reddit['wsb_volume'][given_date].item()
+        return_dict = {
+            'wsb_volume': value
+        }
+    except KeyError as e:
+        print(f'Invalid given_date index/key for {e}')
+        return_dict = {
+            'wsb_volume': 0
+        }
+
+    return return_dict
+
+
 def get_technical_indicators_for_symbol(stock_data):
     price_sma_5_symbol = get_price_sma(stock_data, window=5)
     price_sma_10_symbol = get_price_sma(stock_data, window=10)

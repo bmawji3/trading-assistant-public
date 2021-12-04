@@ -14,6 +14,7 @@ cors = CORS(app)
 parser = reqparse.RequestParser()
 parser.add_argument('date')
 
+
 class Ticker(Resource):
      def get(self, ticker_id):
         ## Returns dictionary of stock data
@@ -21,10 +22,9 @@ class Ticker(Resource):
         data = data.to_dict()  # convert dataframe to dictionary
         return {'data': data}, 200 
 
+
 class DailyStocks(Resource):
      def get(self):
-         #TODO: Should return list of stocks that represent a trading opportunity
-
         args = parser.parse_args()
         date = args['date']
         buy_prediction = ta.read_predictions(date, buy=True)
@@ -34,14 +34,22 @@ class DailyStocks(Resource):
             'sell_prediction': sell_prediction
         }}, 200
 
+
 class Indicators(Resource):
      def get(self, ticker_id):
-         #TODO: Should return techincal indicators and sentiment analysis for a given ticker and date
-        
         args = parser.parse_args()
         date = args['date']
         technical_indicators = ta.get_technical_indicators_for_date(ticker_id, date)
         return {'data': technical_indicators}, 200
+
+
+class RedditCount(Resource):
+    def get(self, ticker_id):
+        args = parser.parse_args()
+        date = args['date']
+        wsb_volume = ta.get_wsb_volume_for_date(ticker_id, date)
+        return {'data': wsb_volume}, 200
+
 
 class SessionLogger(Resource):
     def post(self):
@@ -66,7 +74,8 @@ class SessionLogger(Resource):
 api.add_resource(Ticker, '/ticker/<string:ticker_id>') 
 api.add_resource(DailyStocks, '/daily_stocks') 
 api.add_resource(Indicators, '/indicators/<string:ticker_id>') 
-api.add_resource(SessionLogger, '/session_log') 
+api.add_resource(RedditCount, '/reddit_count/<string:ticker_id>')
+api.add_resource(SessionLogger, '/session_log')
 
 if __name__ == '__main__':
     app.run()  # run Flask app
