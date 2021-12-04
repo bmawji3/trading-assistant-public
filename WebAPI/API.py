@@ -71,6 +71,13 @@ class SessionLogger(Resource):
         return "OK", 200
 
 
+class GetSessionLogs(Resource):
+    def get(self):
+        with open('user_logs.json', 'r') as fp:
+            my_json = json.load(fp)
+        return my_json
+
+
 api.add_resource(Ticker, '/ticker/<string:ticker_id>') 
 api.add_resource(DailyStocks, '/daily_stocks') 
 api.add_resource(Indicators, '/indicators/<string:ticker_id>') 
