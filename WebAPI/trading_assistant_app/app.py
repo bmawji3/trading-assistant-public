@@ -30,7 +30,12 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
 
     for symbol in symbols:
         # get stock data for a given time
+
+        # This allows for relative path retrieval for WebApp and WebAPI
         stock_data = get_ohlcv(symbol, start_date, end_date, base_dir=os.path.join('trading_assistant_app', 'data'))
+
+        # This should be used when running the app/main function independent of WebApp and WebAPI
+        # stock_data = get_ohlcv(symbol, start_date, end_date, base_dir=os.path.join(os.getcwd(), 'data'))
 
         # Filter out empty OHLCV DF
         if len(stock_data) == 0:
@@ -40,17 +45,23 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
         df_indicators = get_technical_indicators_for_symbol(stock_data)
 
         # gather reddit mention counts
-        df_reddit = pd.read_csv(os.path.join('trading_assistant_app', 'reddit_data', f'{symbol}_rss.csv'))
+        # This allows for relative path retrieval for WebApp and WebAPI
+        reddit_fp = os.path.join('trading_assistant_app', 'reddit_data', f'{symbol}_rss.csv')
+
+        # This should be used when running the app/main function independent of WebApp and WebAPI
+        # reddit_fp = os.path.join(os.getcwd(), 'reddit_data', f'{symbol}_rss.csv')
+
+        df_reddit = pd.read_csv(reddit_fp)
         df_reddit = df_reddit.set_index('Date')
         df_reddit.index = pd.to_datetime(df_reddit.index)
         df_reddit = df_reddit.drop('Ticker', axis=1)
 
         # merge and fill nan data
-        df_merged = pd.merge(df_indicators, df_reddit, how='outer', left_index=True, right_index=True)
+        df_merged = pd.merge(df_indicators, df_reddit, how='left', left_index=True, right_index=True)
         df_merged[['wsb_volume']] = df_merged[['wsb_volume']].fillna(value=0.0)
 
         # initialize dataframe to hold indicators and signal
-        df = df_indicators.copy(deep=True)
+        df = df_merged.copy(deep=True)
 
         # extract closing prices
         prices = stock_data["close"]
@@ -72,24 +83,6 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
                 signal.iloc[i] = 0
 
         df["signal"] = signal.values
-        # y_columns = []
-        # y_df = pd.DataFrame(index=stock_data.index)
-        #
-        # # Calculate % change for each column
-        # for column in df_indicators.columns:
-        #     y_column_name = f'Y_{column}'
-        #     df_indicators[column] = df_indicators[column].pct_change()
-        #     # Check if percentage greater than specified % gain parameter
-        #     y_df[y_column_name] = np.where(df_indicators[column] > percent_gain, 1, 0)
-        #     y_columns.append(y_column_name)
-        #
-        # # Sum the values where column was > % gain parameter
-        # df_indicators['Y'] = y_df.sum(axis=1)
-        # # If sum > ~50%, Then Mark as a Buy Signal, Else Not a Buy Signal
-        # df_indicators['Y'] = np.where(df_indicators['Y'] > np.floor(len(y_columns) / 2), 1, 0)
-        # df_indicators = df_indicators.dropna()
-
-        # df_array.append(df_indicators)
         df_dict[symbol] = df
 
         if debug:
@@ -97,9 +90,7 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
             print(df_indicators.head(n=20), '\n')
             print(df_indicators.columns)
             print(df_indicators.head(n=20), '\n')
-            # print(y_df.head(n=20), '\n')
 
-    # return df_array
     return df_dict
 
 
@@ -192,39 +183,18 @@ def get_list_of_predicted_stocks(percent_gain, given_date, debug=False):
     sell_signal_recognized_list = list()
     empty_df_count = 0
     cwd = os.getcwd()
+
+    # This allows for relative path retrieval for WebApp and WebAPI
     data_directory = os.path.join(cwd, 'trading_assistant_app', 'data')
+
+    # This should be used when running the app/main function independent of WebApp and WebAPI
     # data_directory = os.path.join(cwd, 'data')
+
     files = [f for f in os.listdir(data_directory) if f.endswith('.csv')]
     symbols = [symbol.split('.csv')[0] for symbol in files]
     start_date = dt.datetime(2011, 11, 1)
     end_date = dt.date.today()
     df_dictionary = prepare_data(symbols=symbols, start_date=start_date, end_date=end_date, percent_gain=percent_gain)
-
-    # check_first_df = True
-    # check_first_df_date = False
-    #
-    # if len(df_dictionary) >= 1:
-    #     first_df = df_dictionary[0]
-    #     if len(first_df) == 0:
-    #         check_first_df = False
-    #     if check_first_df:
-    #         try:
-    #             if first_df[f'Y'][given_date] == 1 or first_df[f'Y'][given_date] == 0:
-    #                 check_first_df_date = True
-    #         except KeyError as e:
-    #             if debug:
-    #                 print(f'Invalid given_date index/key for {e}')
-    #
-    # if not check_first_df_date:
-    #     return {
-    #         'buy_signal_recognized_list': buy_signal_recognized_list,
-    #         'len_buy_signal_list': len(buy_signal_recognized_list),
-    #         'sell_signal_recognized_list': sell_signal_recognized_list,
-    #         'len_sell_signal_list': len(sell_signal_recognized_list),
-    #         'len_files': len(files),
-    #         'empty_df_count': empty_df_count,
-    #         'given_date': given_date
-    #     }
 
     for symbol, df in df_dictionary.items():
         if len(df) == 0:
