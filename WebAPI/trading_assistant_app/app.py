@@ -287,12 +287,37 @@ def get_wsb_volume_for_date(symbol, given_date):
             'wsb_volume': value
         }
     except KeyError as e:
-        print(f'Invalid given_date index/key for {e}')
+        # print(f'Invalid given_date index/key for {e}')
         return_dict = {
             'wsb_volume': 0
         }
 
     return return_dict
+
+
+def filter_reddit_count(given_date, minimum_count, buy_predictions=True):
+    # This allows for relative path retrieval for WebApp and WebAPI
+    predictions = pd.read_csv(os.path.join(f'trading_assistant_app',
+                                           f'predictions',
+                                           f'{"buy" if buy_predictions else "sell"}_predictions.csv'))
+
+    # This should be used when running the app/main function independent of WebApp and WebAPI
+    # predictions = pd.read_csv(os.path.join(f'predictions',
+    #                                        f'{"buy" if buy_predictions else "sell"}_predictions.csv'))
+
+    predictions = predictions.fillna('')
+    predictions = predictions.set_index('Date')
+    try:
+        predictions = predictions['Symbols'][given_date]
+    except KeyError as e:
+        predictions = ''
+        print(f'Invalid given_date index/key for {e}')
+
+    predictions_list = predictions.split('_')
+    filtered = filter(lambda symbol:
+                      get_wsb_volume_for_date(symbol, given_date)['wsb_volume'] > minimum_count, predictions_list)
+    filtered_list = list(filtered)
+    return filtered_list
 
 
 def get_technical_indicators_for_symbol(stock_data):
@@ -380,6 +405,7 @@ if __name__ == '__main__':
     end_date = dt.datetime(2021, 12, 1)
     # write_predictions_to_csv(start_date, end_date, percent_gain, path)
     # pred = read_predictions(requested_date)
+    # filter_reddit_count('2021-11-15', 0, buy_predictions=True)
     end_time = dt.datetime.now()
 
     print(f'--------------------------------------------')
