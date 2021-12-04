@@ -28,4 +28,9 @@ In your second terminal shell, run the following command:
 `cd trading-assistant/WebApp`
 `python -m http.server`
 
-In your browser, navigate to http://localhost:8000/ to see the WebApp running
+In your browser, navigate to http://localhost:8000/ to see the WebApp running.
+Additionally, this WebApp is running on an EC2 instance http://ec2-18-208-47-240.compute-1.amazonaws.com:6242/
+
+For setting up on EC2, changes needed to be made to the index to read from correct hosts/ports.
+Additionally, there needs to be processes set up and running.
+On the EC2 instance, Apache HTTP is serving the WebApp and Gunicorn is serving the WebAPI.
