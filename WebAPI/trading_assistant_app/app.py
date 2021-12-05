@@ -392,6 +392,14 @@ if __name__ == '__main__':
     # write_predictions_to_csv(start_date, end_date, percent_gain, path)
     # pred = read_predictions(requested_date)
     # filter_reddit_count('2021-11-15', 0, buy_predictions=True)
+    # buy_pred = read_predictions(requested_date, minimum_count=0, buy=True)
+    # sell_pred = read_predictions(requested_date, minimum_count=0, buy=False)
+    # for symbol in buy_pred:
+    #     if get_wsb_volume_for_date(symbol, requested_date)['wsb_volume'] > 0:
+    #         print(f'Buy: {symbol}')
+    # for symbol in sell_pred:
+    #     if get_wsb_volume_for_date(symbol, requested_date)['wsb_volume'] > 0:
+    #         print(f'Sell: {symbol}')
     end_time = dt.datetime.now()
     #test = get_wsb_volume_for_date('TSLA', start_date)
     print(f'--------------------------------------------')
