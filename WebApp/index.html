@@ -28,7 +28,6 @@
         <p id="finish-message" style="font-size: 16px;"></p>
     </div>
 </div>
-
 <section class="wrapperFullWidth">
     <nav class="navbar navbar-default navbar-top navbar-fixed-top">
         <div class="navbar-header">
@@ -146,7 +145,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                     <!-- Coin Status Ends Here -->
@@ -171,13 +169,9 @@
                     </div>
                 </div>
             </div>
-
-
         </section>
     </section>
 </section>
-
-
 <script src="plugins/jquery/jquery.js"></script>
 <script src="plugins/bootstrap/js/bootstrap.js"></script>
 <script src="plugins/chosen/chosen.jquery.js"></script>
@@ -195,7 +189,6 @@
 <!--<script src="tradify/highcharts.js"></script>-->
 <script src="tradify/exporting.js"></script>
 <script src="plugins/datatable/extensions/ColVis/js/dataTables.colVis.js"></script>
-
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/modules/data.js"></script>
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
@@ -249,28 +242,24 @@
         }
 
         // set the allowed units for data grouping
-        groupingUnits = [[
-            'week',                         // unit name
-            [2]                             // allowed multiples
-        ], [
-            'month',
-            [1, 2, 3, 4, 6]
-        ]],
+        groupingUnits = [
+            ['day', [1]],
+            ['week',[1,2,3]],
+            ['month',[1, 2, 3, 4, 6, 7, 8, 9]]
+        ],
 
             // create the chart
             Highcharts.stockChart('candlestickChart', {
-
                 chart: {},
-
                 yAxis: [{
                     labels: {
                         align: 'right',
                         x: -3
                     },
                     title: {
-                        text: 'OHLC'
+                        text: 'Price ($)'
                     },
-                    height: '60%',
+                    height: '80%',
                     lineWidth: 2,
                     resize: {
                         enabled: true
@@ -283,12 +272,11 @@
                     title: {
                         text: 'Volume'
                     },
-                    top: '65%',
-                    height: '35%',
+                    top: '80%',
+                    height: '20%',
                     offset: 0,
                     lineWidth: 2
                 }],
-
                 rangeSelector: {
                     selected: 0
                 },
