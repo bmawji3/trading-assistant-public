@@ -71,11 +71,20 @@ class SessionLogger(Resource):
         return "OK", 200
 
 
+class GetSessionLogs(Resource):
+    def get(self):
+        my_json = {}
+        with open('user_logs.json', 'r') as fp:
+            my_json = json.load(fp)
+        return my_json
+
+
 api.add_resource(Ticker, '/ticker/<string:ticker_id>') 
 api.add_resource(DailyStocks, '/daily_stocks') 
 api.add_resource(Indicators, '/indicators/<string:ticker_id>') 
 api.add_resource(RedditCount, '/reddit_count/<string:ticker_id>')
 api.add_resource(SessionLogger, '/session_log')
+api.add_resource(GetSessionLogs, '/user_session_log')
 
 if __name__ == '__main__':
     app.run()  # run Flask app

@@ -17,9 +17,11 @@ financial data, 13 technical indicators are calculated and merged with the menti
 on which a machine learning model can be trained on. Additionally, labels are created for each record in the merged
 dataframe. From 10 years of data with 252 trading days for about 500 different stocks, this is about 1,260,000 records of
 data. Next, this 60% of the data is trained with a RandomForestClassifier. Due to the nature of the data being time-series,
-we cannot randomize which data that gets trained and instead have to do a direct split. After training, we find the list
-of stocks that are good buys and good sells and display this to the user. Additionally, we also filter the stocks
-predicted to those seen or mentioned in r/wallstreetbets. Any user of this application can truly experience the
+we cannot randomize which data that gets trained and instead have to do a direct split. In order to simulate the experience
+of day trading, we trained the model to predict data for the month of November 2021. While regular training takes about
+1.5 minutes to complete, training over the month time period took about 45 minutes to complete. After training,
+we find the list of stocks that are good buys and good sells and display this to the user. Additionally, we also filter
+the stocks predicted to those seen or mentioned in r/wallstreetbets. Any user of this application can truly experience the
 sensation of being a part of the subreddit.
 
 
