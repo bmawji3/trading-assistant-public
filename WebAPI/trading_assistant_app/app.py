@@ -393,7 +393,7 @@ if __name__ == '__main__':
     # pred = read_predictions(requested_date)
     # filter_reddit_count('2021-11-15', 0, buy_predictions=True)
     end_time = dt.datetime.now()
-
+    #test = get_wsb_volume_for_date('TSLA', start_date)
     print(f'--------------------------------------------')
     print('STATS')
     print(f'Time taken: {end_time - start_time}')

@@ -31,14 +31,12 @@ class PushShift:
         api_url += "size=500&sort_type=score&sort=desc&subreddit=wallstreetbets"
         api_url += "&q:not=[removed]&selftext:not=[deleted]"
         request = requests.get(api_url)
+        time.sleep(1)
         if str(request) != '<Response [200]>':
             print(request)
-            time.sleep(3)
+            time.sleep(10)
             request = requests.get(api_url)
-            if str(request) != '<Response [200]>':
-                print('Extra Delay')
-                time.sleep(10)
-                request = requests.get(api_url)
+            time.sleep(1)
         api_result = request.json()
         return pd.DataFrame(api_result['data'])
 
@@ -59,12 +57,9 @@ class PushShift:
         request = requests.get(api_url)
         if str(request) != '<Response [200]>':
             print(request)
-            time.sleep(3)
+            time.sleep(10)
             request = requests.get(api_url)
-            if str(request) != '<Response [200]>':
-                print('Extra Delay')
-                time.sleep(10)
-                request = requests.get(api_url)
+            time.sleep(1)
         api_result = request.json()
         df = pd.DataFrame(api_result['data'])
         df.rename(columns={"body": "title"}, inplace=True)
@@ -74,8 +69,8 @@ class PushShift:
         df = self.get_pushshift_data_submissions()
         if df.shape[0] < 1:
             return None
-        if 'link_flair_text' in df.columns\
-                and 'title' in df.columns\
+        if 'link_flair_text' in df.columns \
+                and 'title' in df.columns \
                 and 'selftext' in df.columns:
             df = df[df.link_flair_text != 'Shitpost']
             df = df[df.link_flair_text != 'Gain']
@@ -85,45 +80,10 @@ class PushShift:
             return None
         return df
 
-    def search_sp500(self):
-        """
-        Current SP500 tickers added before query date
-
-        Historical SP500 tickers taken into consideration
-        """
-
-        # Current SP500 Tickers in play
-        current = pd.read_csv("sp_current.csv")
-        current['Date'] = pd.to_datetime(current['Date'])
-        current = current[current.Date <= self.query_date]
-        current = current["Symbol"]
-
-        # Possible SP500 Tickers in play
-        history = pd.read_csv("sp_changes.tsv", sep="\t")
-        history['Date'] = pd.to_datetime(history['Date'], format='%M%d%Y', errors='ignore')
-        history = history[history.Date != '#VALUE!']
-        history['Date'] = pd.to_datetime(history['Date'], errors='ignore')
-        history = history[history.Date <= self.query_date]
-
-        # Aggregate most recent add and removal dates by symbol
-        additions = history.groupby('Symbol').agg(last_add=pd.NamedAgg(column='Date', aggfunc=max))
-        deletions = history.groupby('removed').agg(last_del=pd.NamedAgg(column='Date', aggfunc=max))
-
-        # Join additions with deletions, early date if unavailable
-        change = additions.merge(deletions, how='left', left_index=True, right_index=True)
-        change = change.fillna(datetime.datetime(1800, 1, 1))
-        change = change[change.last_add > change.last_del]
-
-        # Merge old data on new data and clean up
-        sp500_on_date = current.append(pd.Series(change.index), ignore_index=True)
-        sp500_on_date = sp500_on_date.drop_duplicates()
-        sp500_on_date = sp500_on_date.reset_index(drop=True)
-        return pd.DataFrame(sp500_on_date)
-
     def text_with_ticker(self):
         submittor = self.filter_dataset()
         commentor = self.get_pushshift_data_comments()
-        commentor = commentor[["title","associated_award"]]
+        commentor = commentor[["title", "associated_award"]]
         if submittor is None and commentor is None:
             return None
         elif submittor is None:
@@ -132,27 +92,29 @@ class PushShift:
             redditor = submittor
         else:
             redditor = pd.concat([submittor, commentor])
-        sp500_scope = self.search_sp500()
+        sp500_scope = pd.read_csv("sp_current.csv")
         # Count ticker mentions
         mentions = {}
-        for ticker in sp500_scope['Symbol']:
+        for ticker, name in zip(sp500_scope['Symbol'], sp500_scope['Security']):
             ticker_mentions = 0
             for row in redditor.values:
                 if type(row[1]) == str:
-                    if ' ' + ticker + '.' in row[0]\
-                            or ' ' + ticker + '.' in row[1]\
-                            or '$' + ticker + ' ' in row[0]\
-                            or '$' + ticker + ' ' in row[1]\
-                            or '$' + ticker + '.' in row[0]\
-                            or '$' + ticker + '.' in row[1]\
-                            or ' ' + ticker + ',' in row[0]\
-                            or ' ' + ticker + ',' in row[1]:
+                    if ' ' + ticker + '.' in row[0] \
+                            or ' ' + ticker + '.' in row[1] \
+                            or '$' + ticker + ' ' in row[0] \
+                            or '$' + ticker + ' ' in row[1] \
+                            or '$' + ticker + '.' in row[0] \
+                            or '$' + ticker + '.' in row[1] \
+                            or ' ' + ticker + ',' in row[0] \
+                            or ' ' + ticker + ',' in row[1]\
+                            or name in row[0] or name in row[1]:
                         ticker_mentions += 1
                 else:
-                    if ' ' + ticker + '.' in row[0]\
-                            or '$' + ticker + ' ' in row[0]\
-                            or '$' + ticker + '.' in row[0]\
-                            or ' ' + ticker + ',' in row[0]:
+                    if ' ' + ticker + '.' in row[0] \
+                            or '$' + ticker + ' ' in row[0] \
+                            or '$' + ticker + '.' in row[0] \
+                            or ' ' + ticker + ',' in row[0] \
+                            or name in row[0]:
                         ticker_mentions += 1
 
             mentions[ticker] = ticker_mentions
@@ -190,6 +152,43 @@ unique_tickers = set(results['Ticker'].values.tolist())
 for ticker in unique_tickers:
     is_ticker = results['Ticker'] == ticker
     to_file = results[is_ticker]
-    to_file.to_csv('reddit_refined/' + ticker + '_rss_wc.csv', index=False)
+    to_file.to_csv('reddit_refined2/' + ticker + '_rss_wc.csv', index=False)
 
 r = 1
+
+# Thought we would have more time for adjusting for old
+# SP500 changes, sadly this will not be used in this iteration
+# def search_sp500(self):
+#     """
+#     Current SP500 tickers added before query date
+#
+#     Historical SP500 tickers taken into consideration
+#     """
+#
+#     # Current SP500 Tickers in play
+#     current = pd.read_csv("sp_current.csv")
+#     current['Date'] = pd.to_datetime(current['Date'])
+#     current = current[current.Date <= self.query_date]
+#     current = current["Symbol"]
+#
+#     # Possible SP500 Tickers in play
+#     history = pd.read_csv("sp_changes.tsv", sep="\t")
+#     history['Date'] = pd.to_datetime(history['Date'], format='%M%d%Y', errors='ignore')
+#     history = history[history.Date != '#VALUE!']
+#     history['Date'] = pd.to_datetime(history['Date'], errors='ignore')
+#     history = history[history.Date <= self.query_date]
+#
+#     # Aggregate most recent add and removal dates by symbol
+#     additions = history.groupby('Symbol').agg(last_add=pd.NamedAgg(column='Date', aggfunc=max))
+#     deletions = history.groupby('removed').agg(last_del=pd.NamedAgg(column='Date', aggfunc=max))
+#
+#     # Join additions with deletions, early date if unavailable
+#     change = additions.merge(deletions, how='left', left_index=True, right_index=True)
+#     change = change.fillna(datetime.datetime(1800, 1, 1))
+#     change = change[change.last_add > change.last_del]
+#
+#     # Merge old data on new data and clean up
+#     sp500_on_date = current.append(pd.Series(change.index), ignore_index=True)
+#     sp500_on_date = sp500_on_date.drop_duplicates()
+#     sp500_on_date = sp500_on_date.reset_index(drop=True)
+#     return pd.DataFrame(sp500_on_date)
