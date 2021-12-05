@@ -16,7 +16,7 @@ class PushShift:
         self.day_before = self.end_date.day
         self.day_after = query_date.day
 
-    def get_pushshift_data(self):
+    def get_pushshift_data_submissions(self):
         """
         Gets data from the pushshift api.
         Read more: https://github.com/pushshift/api
@@ -42,8 +42,36 @@ class PushShift:
         api_result = request.json()
         return pd.DataFrame(api_result['data'])
 
+    def get_pushshift_data_comments(self):
+        """
+        Gets data from the pushshift api.
+        Read more: https://github.com/pushshift/api
+        """
+        # Calculate epoch from today and input date
+        before = str((datetime.datetime.now() - datetime.datetime(
+            self.year_before, self.month_before, self.day_before)).days) + "d"
+        after = str((datetime.datetime.now() - datetime.datetime(
+            self.year_after, self.month_after, self.day_after)).days) + "d"
+        api_url = "https://api.pushshift.io/reddit/search/comment/?"
+        api_url += f"before={before}&after={after}&"
+        api_url += "size=500&sort_type=score&sort=desc&subreddit=wallstreetbets"
+        api_url += "&q:not=[removed]&selftext:not=[deleted]"
+        request = requests.get(api_url)
+        if str(request) != '<Response [200]>':
+            print(request)
+            time.sleep(3)
+            request = requests.get(api_url)
+            if str(request) != '<Response [200]>':
+                print('Extra Delay')
+                time.sleep(10)
+                request = requests.get(api_url)
+        api_result = request.json()
+        df = pd.DataFrame(api_result['data'])
+        df.rename(columns={"body": "title"}, inplace=True)
+        return df
+
     def filter_dataset(self):
-        df = self.get_pushshift_data()
+        df = self.get_pushshift_data_submissions()
         if df.shape[0] < 1:
             return None
         if 'link_flair_text' in df.columns\
@@ -93,9 +121,17 @@ class PushShift:
         return pd.DataFrame(sp500_on_date)
 
     def text_with_ticker(self):
-        redditor = self.filter_dataset()
-        if redditor is None:
+        submittor = self.filter_dataset()
+        commentor = self.get_pushshift_data_comments()
+        commentor = commentor[["title","associated_award"]]
+        if submittor is None and commentor is None:
             return None
+        elif submittor is None:
+            redditor = commentor
+        elif commentor is None:
+            redditor = submittor
+        else:
+            redditor = pd.concat([submittor, commentor])
         sp500_scope = self.search_sp500()
         # Count ticker mentions
         mentions = {}
@@ -132,8 +168,8 @@ class PushShift:
         return df
 
 
-start_date = datetime.datetime(2012, 1, 31)
-end_date = datetime.datetime(2021, 12, 1)
+start_date = datetime.datetime(2021, 11, 1)
+end_date = datetime.datetime(2021, 12, 3)
 delta = datetime.timedelta(days=1)
 i = 0
 results = pd.DataFrame(columns=['Date', 'Ticker', 'wsb_volume'])
@@ -145,14 +181,15 @@ while start_date <= end_date:
     else:
         time.sleep(0.5)
     i += 1
-    if i % 30 == 0:
-        print(start_date)
+    print(start_date)
     start_date += delta
     time.sleep(0.5)
 
-unique_tickers = results['Ticker'].values.tolist()
+unique_tickers = set(results['Ticker'].values.tolist())
 
 for ticker in unique_tickers:
     is_ticker = results['Ticker'] == ticker
     to_file = results[is_ticker]
-    to_file.to_csv('reddit_data/' + ticker + '_rss.csv', index=False)
+    to_file.to_csv('reddit_refined/' + ticker + '_rss_wc.csv', index=False)
+
+r = 1
