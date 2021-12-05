@@ -134,13 +134,16 @@ def train_model(df, symbol, debug=False):
     return df_y_pred
 
 
-def s3_upload_and_list():
+def s3_upload_and_list(debug=False):
     # Set up variables
     cwd = os.getcwd()
-    data_directory = os.path.join(cwd, 'data')
+    data_directory = os.path.join(cwd, 'trading_assistant_app', 'data')
+    # data_directory = os.path.join(cwd, 'trading_assistant_app', 'reddit_data')
+    # data_directory = os.path.join(cwd, 'trading_assistant_app', 'reddit_refined')
+    # data_directory = os.path.join(cwd, 'trading_assistant_app', 'predictions')
 
     # Read Config
-    aws_config_fp = os.path.join(os.getcwd(), 'config', 'aws_config.json')
+    aws_config_fp = os.path.join(cwd, 'trading_assistant_app', 'config', 'aws_config.json')
     with open(aws_config_fp) as fp:
         aws_config = json.load(fp)
 
@@ -150,7 +153,8 @@ def s3_upload_and_list():
     bucket = aws_config['bucket_name']
 
     # List current Buckets & Objects per Bucket
-    print_bucket_objects(s3, bucket)
+    if debug:
+        print_bucket_objects(s3, bucket)
 
     # Upload files to Bucket
     files = [f for f in os.listdir(data_directory) if f.endswith('.csv')]
@@ -162,7 +166,8 @@ def s3_upload_and_list():
     #     delete_object(s3, bucket, file)
 
     # List Buckets & Objects after Upload
-    print_bucket_objects(s3, bucket)
+    if debug:
+        print_bucket_objects(s3, bucket)
 
 
 def gather_download_data(sd, ed, download_new_data=False):
