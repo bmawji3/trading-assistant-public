@@ -142,7 +142,7 @@
                                                 SMA
                                                 <input type="checkbox" id="sma-toggle1" class="checkbox-primary">
                                             </span>
-                                            <input class="form-control in" id="sma-val1" type="number">
+                                            <input class="form-control in" id="sma-val1" type="number" min="3">
                                         </div>
                                         <div class="input-group form-inline">
                                             <span class="input-group-addon">
@@ -781,14 +781,23 @@
             }
             return false
         }
+        function verify_TI(value) {
+            if (value == "") {
+                return 3
+            }
+            if (parseInt(value) < 3) {
+                return 3
+            }
+            return value
+        }
         $("#reload_chart").click(function () {
             tiValues = {
-                sma1: document.getElementById("sma-val1").value,
-                sma2: document.getElementById("sma-val2").value,
-                ema1: document.getElementById("ema-val1").value,
-                ema2: document.getElementById("ema-val2").value,
-                bb1: document.getElementById("bb-val1").value,
-                bb2: document.getElementById("bb-val2").value,
+                sma1: verify_TI(document.getElementById("sma-val1").value),
+                sma2: verify_TI(document.getElementById("sma-val2").value),
+                ema1: verify_TI(document.getElementById("ema-val1").value),
+                ema2: verify_TI(document.getElementById("ema-val2").value),
+                bb1: verify_TI(document.getElementById("bb-val1").value),
+                bb2: verify_TI(document.getElementById("bb-val2").value),
             }
             chartTI = {
                 sma1: checkreturn(document.getElementById("sma-toggle1")),
