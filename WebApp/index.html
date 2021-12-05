@@ -54,7 +54,6 @@
                                     <div class="panel-body">
                                         <h4 id="stock-name"></h4>
                                         <div id="candlestickChart" class="h-300">
-
                                         </div>
                                     </div>
                                 </div>
@@ -130,18 +129,61 @@
                 <div class="col-md-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <div class="panel-title">Reddit</div>
+                            <div class="panel-title">Tendie Acquisition Assistant</div>
                         </div>
                         <div class="list-group">
                             <div class="list-group-item">
                                 <div class="media">
-                                    <div class="pull-left">
-                                        <span class="fa-stack fa-lg">
-                                        </span>
+                                    <strong>r/wallstreetbets mentions</strong>
+                                    <div id="wsb_volume"></div>
+                                    <div class="col-md-6">
+                                        <div class="input-group form-inline">
+                                            <span class="input-group-addon">
+                                                SMA
+                                                <input type="checkbox" id="sma-toggle1" class="checkbox-primary">
+                                            </span>
+                                            <input class="form-control in" id="sma-val1" type="number">
+                                        </div>
+                                        <div class="input-group form-inline">
+                                            <span class="input-group-addon">
+                                                EMA
+                                                <input type="checkbox" id="ema-toggle1" class="checkbox-primary">
+                                            </span>
+                                            <input class="form-control in" id="ema-val1" type="number">
+                                        </div>
+                                        <div class="input-group form-inline">
+                                            <span class="input-group-addon">
+                                                BB&nbsp;&nbsp;&nbsp;
+                                                <input type="checkbox" id="bb-toggle1" class="checkbox-primary">
+                                            </span>
+                                            <input class="form-control in" id="bb-val1" type="number">
+                                        </div>
                                     </div>
-                                    <div class="media-body clearfix">
-                                        <strong>r/wallstreetbets mentions</strong>
-                                        <div id="wsb_volume"></div>
+                                    <div class="col-md-6">
+                                        <div class="input-group form-inline">
+                                            <span class="input-group-addon">
+                                                SMA
+                                                <input type="checkbox" id="sma-toggle2" class="checkbox-primary">
+                                            </span>
+                                            <input class="form-control in" id="sma-val2" type="number">
+                                        </div>
+                                        <div class="input-group form-inline">
+                                            <span class="input-group-addon">
+                                                EMA
+                                                <input type="checkbox" id="ema-toggle2" class="checkbox-primary">
+                                            </span>
+                                            <input class="form-control in" id="ema-val2" type="number">
+                                        </div>
+                                        <div class="input-group form-inline">
+                                            <span class="input-group-addon">
+                                                BB&nbsp;&nbsp;&nbsp;
+                                                <input type="checkbox" id="bb-toggle2" class="checkbox-primary">
+                                            </span>
+                                            <input class="form-control in" id="bb-val2" type="number">
+                                        </div>
+                                    </div>
+                                    <div class="input-group-addon">
+                                        <button class="button m-t-5" id="reload_chart">Update Indicators</button>
                                     </div>
                                 </div>
                             </div>
@@ -211,11 +253,12 @@
     var portfolio = {}
     var stockData = {} // Hold current stock ohlcv
 
+    var chartTI = {sma1: false, ema1: false, bb1: false, sma2: false, ema2: false, bb2: false}
+    var tiValues = {sma1: 2, ema1: 2, bb1: 2, sma2: 2, ema2: 2, bb2: 2}
     function plotStockData(ticker, data) {
         indexToday = Object.values(data["Date"]).findIndex(x => x === tradingDays[currentDate])
         socialSentiment = Object.values(data["wsb_volume"])[indexToday]
         document.getElementById("wsb_volume").textContent = socialSentiment
-
         currentPrice = data.Open[Object.keys(data.Date).find(key => data.Date[key] === tradingDays[currentDate])];
         $("#stock-name").html(`${ticker} $${Math.round(currentPrice * 100) / 100}`);
 
@@ -288,21 +331,63 @@
                 }, {
                   type: 'sma',
                   linkedTo: ticker,
+                    visible: chartTI["sma1"],
                     marker: {
                       enabled: false,
                     },
                   params: {
-                    period: 14
+                    period: tiValues["sma1"]
                   },
-                }, {
+                },{
                   type: 'sma',
                   linkedTo: ticker,
+                    visible: chartTI["sma2"],
                     marker: {
                       enabled: false,
                     },
                   params: {
-                    period: 28
-                  }
+                    period: tiValues["sma2"]
+                  },
+                },{
+                  type: 'ema',
+                  linkedTo: ticker,
+                    visible: chartTI["ema1"],
+                    marker: {
+                      enabled: false,
+                    },
+                  params: {
+                    period: tiValues["ema1"]
+                  },
+                },{
+                  type: 'ema',
+                  linkedTo: ticker,
+                    visible: chartTI["ema2"],
+                    marker: {
+                      enabled: false,
+                    },
+                  params: {
+                    period: tiValues["ema2"]
+                  },
+                },{
+                  type: 'bb',
+                  linkedTo: ticker,
+                    visible: chartTI["bb1"],
+                    marker: {
+                      enabled: false,
+                    },
+                  params: {
+                    period: tiValues["bb1"]
+                  },
+                },{
+                  type: 'bb',
+                  linkedTo: ticker,
+                    visible: chartTI["bb2"],
+                    marker: {
+                      enabled: false,
+                    },
+                  params: {
+                    period: tiValues["bb2"]
+                  },
                 },
                 {
                     type: 'column',
@@ -689,6 +774,31 @@
         }
         $("#close-modal").click(function () {
             $("#day-modal").css({display: "none"})
+        })
+        function checkreturn(box) {
+            if (box.checked) {
+                return true
+            }
+            return false
+        }
+        $("#reload_chart").click(function () {
+            tiValues = {
+                sma1: document.getElementById("sma-val1").value,
+                sma2: document.getElementById("sma-val2").value,
+                ema1: document.getElementById("ema-val1").value,
+                ema2: document.getElementById("ema-val2").value,
+                bb1: document.getElementById("bb-val1").value,
+                bb2: document.getElementById("bb-val2").value,
+            }
+            chartTI = {
+                sma1: checkreturn(document.getElementById("sma-toggle1")),
+                sma2: checkreturn(document.getElementById("sma-toggle2")),
+                ema1: checkreturn(document.getElementById("ema-toggle1")),
+                ema2: checkreturn(document.getElementById("ema-toggle2")),
+                bb1: checkreturn(document.getElementById("bb-toggle1")),
+                bb2: checkreturn(document.getElementById("bb-toggle2")),
+            }
+            getStockData(ticker)
         })
     });
 </script>
