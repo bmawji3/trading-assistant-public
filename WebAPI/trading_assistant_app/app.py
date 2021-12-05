@@ -51,7 +51,12 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
         # This should be used when running the app/main function independent of WebApp and WebAPI
         # reddit_fp = os.path.join(os.getcwd(), 'reddit_data', f'{symbol}_rss.csv')
 
-        df_reddit = pd.read_csv(reddit_fp)
+        try:
+            df_reddit = pd.read_csv(reddit_fp)
+        except FileNotFoundError as e:
+            # print(f"No such file {symbol}_rss_wc.csv")
+            continue
+
         df_reddit = df_reddit.set_index('Date')
         df_reddit.index = pd.to_datetime(df_reddit.index)
         df_reddit = df_reddit.drop('Ticker', axis=1)
@@ -288,7 +293,11 @@ def get_wsb_volume_for_date(symbol, given_date):
     df_reddit = df_reddit.drop('Ticker', axis=1)
 
     try:
-        value = df_reddit['wsb_volume'][given_date].item()
+        value = df_reddit['wsb_volume'][given_date].tolist()
+        if len(value) == 0:
+            value = 0
+        else:
+            value = value[0]
         return_dict = {
             'wsb_volume': value
         }
@@ -376,7 +385,7 @@ if __name__ == '__main__':
     debug = False
     percent_gain = 0.03
     path = os.path.join('trading_assistant_app', 'predictions')
-    requested_date = '2021-11-24'
+    requested_date = '2021-11-12'
     start_time = dt.datetime.now()
     # Import Data Logic
     # reddit_files = [f.split('_rss.csv')[0] for f in os.listdir('trading_assistant_app/reddit_data')]
