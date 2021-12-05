@@ -2,6 +2,7 @@ import requests
 import datetime
 import pandas as pd
 import time
+import os
 
 
 class PushShift:
@@ -31,13 +32,12 @@ class PushShift:
         api_url += "size=500&sort_type=score&sort=desc&subreddit=wallstreetbets"
         api_url += "&q:not=[removed]&selftext:not=[deleted]"
         request = requests.get(api_url)
-        time.sleep(1)
-        if str(request) != '<Response [200]>':
+        while str(request) != '<Response [200]>':
             print(request)
-            time.sleep(10)
+            time.sleep(5)
             request = requests.get(api_url)
-            time.sleep(1)
         api_result = request.json()
+        time.sleep(1)
         return pd.DataFrame(api_result['data'])
 
     def get_pushshift_data_comments(self):
@@ -55,11 +55,10 @@ class PushShift:
         api_url += "size=500&sort_type=score&sort=desc&subreddit=wallstreetbets"
         api_url += "&q:not=[removed]&selftext:not=[deleted]"
         request = requests.get(api_url)
-        if str(request) != '<Response [200]>':
+        while str(request) != '<Response [200]>':
             print(request)
-            time.sleep(10)
+            time.sleep(5)
             request = requests.get(api_url)
-            time.sleep(1)
         api_result = request.json()
         df = pd.DataFrame(api_result['data'])
         df.rename(columns={"body": "title"}, inplace=True)
@@ -83,7 +82,10 @@ class PushShift:
     def text_with_ticker(self):
         submittor = self.filter_dataset()
         commentor = self.get_pushshift_data_comments()
-        commentor = commentor[["title", "associated_award"]]
+        if commentor.size == 0:
+            commentor = None
+        else:
+            commentor = commentor[["title", "score"]]
         if submittor is None and commentor is None:
             return None
         elif submittor is None:
@@ -130,34 +132,43 @@ class PushShift:
         return df
 
 
-start_date = datetime.datetime(2021, 11, 1)
-end_date = datetime.datetime(2021, 12, 3)
+start_date = datetime.datetime(2019, 10, 7)
+end_date = datetime.datetime(2012, 1, 31)
 delta = datetime.timedelta(days=1)
 i = 0
-results = pd.DataFrame(columns=['Date', 'Ticker', 'wsb_volume'])
-while start_date <= end_date:
+
+while start_date >= end_date:
     test = PushShift(start_date)
     tickers = test.text_with_ticker()
     if tickers is not None:
-        results = pd.concat([results, tickers])
+        unique_tickers = set(tickers['Ticker'].values.tolist())
+        for ticker in unique_tickers:
+            is_ticker = tickers['Ticker'] == ticker
+            to_file = tickers[is_ticker]
+            # if file does not exist write header
+            if not os.path.isfile('reddit_final/' + ticker + '_rss_wc.csv'):
+                to_file.to_csv('reddit_final/' + ticker + '_rss_wc.csv', index=False)
+            else:  # else it exists so append without writing the header
+                to_file.to_csv('reddit_final/' + ticker + '_rss_wc.csv', mode='a', header=False, index=False)
     else:
-        time.sleep(0.5)
-    i += 1
+        time.sleep(1)
     print(start_date)
-    start_date += delta
-    time.sleep(0.5)
+    start_date -= delta
+    time.sleep(0.1)
 
-unique_tickers = set(results['Ticker'].values.tolist())
+# unique_tickers = set(results['Ticker'].values.tolist())
 
-for ticker in unique_tickers:
-    is_ticker = results['Ticker'] == ticker
-    to_file = results[is_ticker]
-    to_file.to_csv('reddit_refined2/' + ticker + '_rss_wc.csv', index=False)
+# for ticker in unique_tickers:
+#     is_ticker = results['Ticker'] == ticker
+#     to_file = results[is_ticker]
+#     # if file does not exist write header
+#     if not os.path.isfile('reddit_final/' + ticker + '_rss_wc.csv'):
+#         to_file.to_csv('reddit_final/' + ticker + '_rss_wc.csv', index=False)
+#     else:  # else it exists so append without writing the header
+#         to_file.to_csv('reddit_final/' + ticker + '_rss_wc.csv', mode='a', header=False, index=False)
 
-r = 1
 
-# Thought we would have more time for adjusting for old
-# SP500 changes, sadly this will not be used in this iteration
+# This will not be used in this iteration, useful sp500 contents by date
 # def search_sp500(self):
 #     """
 #     Current SP500 tickers added before query date
