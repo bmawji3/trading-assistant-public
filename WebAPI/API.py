@@ -76,7 +76,7 @@ class GetSessionLogs(Resource):
         my_json = {}
         with open('user_logs.json', 'r') as fp:
             my_json = json.load(fp)
-        return my_json
+        return my_json, 200
 
 
 api.add_resource(Ticker, '/ticker/<string:ticker_id>') 
