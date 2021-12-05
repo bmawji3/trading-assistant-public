@@ -92,8 +92,8 @@
                                                 <span class="input-group-addon">$</span>
                                                 <input class="form-control" id="buy-input">
                                                 <span class="input-group-btn">
-                                       <button type="button" class="btn btn-success" id="buy-button">Buy</button>
-                                    </span>
+                                                   <button type="button" class="btn btn-success" id="buy-button">Buy</button>
+                                                </span>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
@@ -131,25 +131,18 @@
                 <div class="col-md-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <div class="panel-title">Social Metrics</div>
+                            <div class="panel-title">Reddit</div>
                         </div>
                         <div class="list-group">
                             <div class="list-group-item">
                                 <div class="media">
                                     <div class="pull-left">
-                                 <span class="fa-stack fa-lg">
-                                    <em class="fa fa-circle fa-stack-2x text-danger"></em>
-                                    <em class="fa fa-level-down fa-stack-1x fa-inverse text-white"></em>
-                                 </span>
+                                        <span class="fa-stack fa-lg">
+                                        </span>
                                     </div>
                                     <div class="media-body clearfix">
-                                        <strong>Metric 3</strong>
-                                        <p class="m0">
-                                            <small class="text-danger">$0.02</small>
-                                        </p>
-                                        <p><i class="fa fa-btc"></i> 0.00000261 <i
-                                                class="fa fa-level-down text-danger"></i>
-                                        </p>
+                                        <strong>r/wallstreetbets mentions</strong>
+                                        <div id="wsb_volume"></div>
                                     </div>
                                 </div>
                             </div>
@@ -226,6 +219,9 @@
     var stockData = {} // Hold current stock ohlcv
 
     function plotStockData(ticker, data) {
+        indexToday = Object.values(data["Date"]).findIndex(x => x === tradingDays[currentDate])
+        socialSentiment = Object.values(data["wsb_volume"])[indexToday]
+        document.getElementById("wsb_volume").textContent = socialSentiment
 
         currentPrice = data.Open[Object.keys(data.Date).find(key => data.Date[key] === tradingDays[currentDate])];
         $("#stock-name").html(`${ticker} $${Math.round(currentPrice * 100) / 100}`);
@@ -431,10 +427,7 @@
 
 <script>
     $(document).ready(() => {
-
         $("#trading-date").html(`Trading Date: ${tradingDays[currentDate]}`);
-
-
         // Get stocks of the day and load chart with the first one
         getDailyStocks(tradingDays[currentDate])
             .then((dailyStocks) => {
@@ -451,7 +444,6 @@
                   document.getElementById("prev-button").disabled = false;
                }
             })
-
         // user buttons
         $("#prev-button").click(() => {
             page -= 1
@@ -473,14 +465,12 @@
                 alert("Invalid buy amount")
                 return
             }
-
             // Parse value
             buyAmount = parseFloat(buyAmount.replace(/,/g, ''))
             if (buyAmount > buyingPower) {
                 alert("Insufficient funds")
                 return
             }
-
             // Get current price and assign amount of stocks to portfolio
             currentPrice = stockData.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
             if (portfolio[ticker]) portfolio[ticker].shares += buyAmount / currentPrice
@@ -488,30 +478,24 @@
                 shares: buyAmount / currentPrice,
                 data: stockData
             }
-
             // Reduce buying power
             buyingPower -= buyAmount
-
             // Update UI
             $("#buy-input").val("0");
             updatePortfolioDisplay()
             updateBuyingPowerDisplay()
-
             // Autoclick next button
             document.getElementById("skip-button").click();
         });
         $("#sell-button").click(function () {
-
             // Read input
             sellAmount = $("#sell-input").val()
             if (sellAmount == "" || sellAmount == 0) {
                 alert("Invalid sell amount")
                 return
             }
-
             // Get current price and assign amount of stocks to portfolio
             currentPrice = stockData.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
-
             // Parse value
             sellAmount = parseFloat(sellAmount.replace(/,/g, ''))
             console.log(ticker)
@@ -519,9 +503,7 @@
                 alert("Insufficient stocks")
                 return
             }
-
             portfolio[ticker].shares -= sellAmount / currentPrice
-
             // increase buying power
             buyingPower += sellAmount
 
@@ -532,7 +514,6 @@
             // Autoclick next button
             document.getElementById("skip-button").click();
         });
-
 
         // thousand separators for inputs
         $("#buy-input").on("keyup", function (event) {
@@ -574,7 +555,6 @@
             });
         });
 
-
         // When the user clicks the button, open the modal
         $("#finish-button").click(() => {
 
@@ -595,8 +575,8 @@
 
             // Start next date
             currentDate += 1
-
-
+            document.getElementById("buy-input").value = "";
+            document.getElementById("sell-input").value = "";
             // finish game and save results in the server
             if (currentDate == tradingDays.length) {
                 dataLog.total = portfolioValue + buyingPower

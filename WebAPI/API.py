@@ -19,6 +19,10 @@ class Ticker(Resource):
      def get(self, ticker_id):
         ## Returns dictionary of stock data
         data = pd.read_csv(f'trading_assistant_app/data/{ticker_id}.csv')  # read CSV
+        reddit = pd.read_csv(f'trading_assistant_app/reddit_refined/{ticker_id}_rss_wc.csv')
+        reddit = reddit[["Date", "wsb_volume"]]
+        data = data.merge(reddit, how='left', on='Date')
+        data['wsb_volume'] = data['wsb_volume'].fillna(0)
         data = data.to_dict()  # convert dataframe to dictionary
         return {'data': data}, 200 
 
