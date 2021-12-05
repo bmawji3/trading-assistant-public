@@ -363,9 +363,12 @@ def read_predictions(given_date, minimum_count=0, buy=True, debug=False):
             return []
     elif isinstance(symbols, str):
         predictions_list = symbols.split('_')
-        filtered = filter(lambda symbol:
-                          get_wsb_volume_for_date(symbol, given_date)['wsb_volume'] > minimum_count, predictions_list)
-        filtered_list = list(filtered)
+        if buy:
+            filtered = filter(lambda symbol:
+                              get_wsb_volume_for_date(symbol, given_date)['wsb_volume'] > minimum_count, predictions_list)
+            filtered_list = list(filtered)
+        else:
+            filtered_list = predictions_list
         return filtered_list
 
 

@@ -150,8 +150,8 @@
                     <!-- Coin Status Ends Here -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <div class="pull-right"><i class="fa fa-bullhorn"></i></div>
-                            <div class="panel-title">Portfolio</div>
+                            <div class="pull-right"><i class="fa fa-flag"></i></div>
+                            <div class="panel-title">Portfolio: Select Row to View & Trade Holdings</div>
                         </div>
                         <table class="table table-striped table-hover">
                             <thead>
@@ -234,20 +234,17 @@
                 Math.round(data.Low[i] * 100) / 100, // low
                 Math.round(data.Close[i] * 100) / 100 // close
             ]);
-
             volume.push([
                 date, // the date
                 data.Volume[i] // the volume
             ]);
         }
-
         // set the allowed units for data grouping
         groupingUnits = [
             ['day', [1]],
             ['week',[1,2,3]],
             ['month',[1, 2, 3, 4, 6, 7, 8, 9]]
         ],
-
             // create the chart
             Highcharts.stockChart('candlestickChart', {
                 chart: {},
@@ -290,21 +287,29 @@
                     }
                 },
                     {
-                        type: 'bb',
-                        linkedTo: ticker
-                    },
-                    {
-                        type: 'column',
-                        name: 'Volume',
-                        data: volume,
-                        yAxis: 1,
-                        dataGrouping: {
-                            units: groupingUnits
-                        }
-                    }]
+                  type: 'sma',
+                  linkedTo: ticker,
+                  params: {
+                    period: 14
+                  }
+                }, {
+                  type: 'sma',
+                  linkedTo: ticker,
+                  params: {
+                    period: 28
+                  }
+                },
+                {
+                    type: 'column',
+                    name: 'Volume',
+                    data: volume,
+                    yAxis: 1,
+                    dataGrouping: {
+                        units: groupingUnits
+                    }
+                }]
             });
     }
-
     function updatePortfolioDisplay() {
         $("#portfolio-table").html(`
          ${Object.keys(portfolio).map(key => {
@@ -315,7 +320,6 @@
                 lastPrice = portfolio[key].data.Open[Object.keys(portfolio[key].data.Date).find(k => portfolio[key].data.Date[k] === tradingDays[currentDate - 1])];
             }
             percentChange = Math.round(((currentPrice / lastPrice) - 1) * 100 * 100) / 100
-
             return (
                 `
                <tr>
@@ -329,12 +333,10 @@
             )
         })}
          `)
-
         portfolioValue = Object.keys(portfolio).map(key => {
             currentPrice = portfolio[key].data.Open[Object.keys(portfolio[key].data.Date).find(k => portfolio[key].data.Date[k] === tradingDays[currentDate])];
             return (portfolio[key].shares * currentPrice)
         }).reduce((pv, cv) => pv + cv, 0);
-
         $("#portfolio-foot").html(`
                <tr>
                   <th>Buy Power</th>
@@ -351,7 +353,6 @@
                   <th>\$${(Math.round((buyingPower + portfolioValue) * 100) / 100).toLocaleString("en-US")}</th>
                </tr>
          `)
-
         var table = document.getElementById("portfolio-table");
         var rows = table.getElementsByTagName("tr");
         for (i = 0; i < rows.length; i++) {
@@ -359,60 +360,62 @@
             var createClickHandler = (row) => {
                 return () => {
                     ticker = row.getElementsByTagName("td")[0].innerHTML;
+                    if (!stockList.includes(ticker)) {
+                        stockList.unshift(ticker)
+                    }
+                    if (stockList.length == 1) {
+                      document.getElementById("skip-button").disabled = true;
+                      document.getElementById("prev-button").disabled = true;
+                   }
+                   else {
+                      document.getElementById("skip-button").disabled = false;
+                      document.getElementById("prev-button").disabled = false;
+                   }
                     getStockData(ticker)
                 };
             };
             currentRow.onclick = createClickHandler(currentRow);
         }
-
     }
-
     function updateBuyingPowerDisplay() {
         currentPrice = portfolio[ticker].data.Open[Object.keys(portfolio[ticker].data.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
-
         $("#buying-power").html("$" + buyingPower.toLocaleString("en-US"));
         $("#shares-display").html(`${ticker} Shares: ${Math.round(portfolio[ticker].shares * 100) / 100} (\$${Math.round(portfolio[ticker].shares * currentPrice * 100) / 100})`);
-
     }
-
     function getDailyStocks(date) {
         return fetch(`http://127.0.0.1:5000/daily_stocks?date=${date}`)
-            .then(response => response.json())
-            .then(data => {
-                // Get list of stocks that can be traded on the given date
-                stocks = data.data.buy_prediction
-                data.data.sell_prediction.forEach(s => {
-                    if (s in Object.keys(portfolio)) {
-                        stocks.push(s)
-                    }
-                });
-                return stocks
-            })
+        .then(response => response.json())
+        .then(data => {
+            // Get list of stocks that can be traded on the given date
+            stocks = data.data.buy_prediction
+            data.data.sell_prediction.forEach(s => {
+                if (s in Object.keys(portfolio)) {
+                    stocks.push(s)
+                }
+            });
+            return stocks
+        })
     }
-
     function getStockData(ticker) {
         fetch(`http://127.0.0.1:5000/ticker/${ticker}`)
-            .then((response) => response.json())
-            .then((data) => {
-                stockData = data.data
-                plotStockData(ticker, stockData)
-                if (portfolio[ticker]) {
-                    currentPrice = stockData.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
-                    $("#shares-display").html(`${ticker} Shares: ${Math.round(portfolio[ticker].shares * 100) / 100} (\$${Math.round(portfolio[ticker].shares * currentPrice * 100) / 100})`);
-                } else {
-                    $("#shares-display").html(`${ticker} Shares: 0`);
-                }
-                return fetch(`http://127.0.0.1:5000/indicators/${ticker}?date=${tradingDays[currentDate]}`)
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data)
-            })
-
+        .then((response) => response.json())
+        .then((data) => {
+            stockData = data.data
+            plotStockData(ticker, stockData)
+            if (portfolio[ticker]) {
+                currentPrice = stockData.Open[Object.keys(stockData.Date).find(key => stockData.Date[key] === tradingDays[currentDate])];
+                $("#shares-display").html(`${ticker} Shares: ${Math.round(portfolio[ticker].shares * 100) / 100} (\$${Math.round(portfolio[ticker].shares * currentPrice * 100) / 100})`);
+            } else {
+                $("#shares-display").html(`${ticker} Shares: 0`);
+            }
+            return fetch(`http://127.0.0.1:5000/indicators/${ticker}?date=${tradingDays[currentDate]}`)
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data)
+        })
     }
-
 </script>
-
 <script>
     $(document).ready(() => {
         $("#trading-date").html(`Trading Date: ${tradingDays[currentDate]}`);
@@ -423,7 +426,7 @@
                 // Get data from the first stock
                 ticker = stockList[0]
                 getStockData(ticker)
-               if (stockList.length < 2) {
+               if (stockList.length == 1) {
                   document.getElementById("skip-button").disabled = true;
                   document.getElementById("prev-button").disabled = true;
                }
@@ -441,12 +444,22 @@
         });
         $("#skip-button").click(() => {
             page += 1
-            if (page >= stockList.length) page = 0
-            ticker = stockList[page]
-            getStockData(ticker)
+            if (ticker == stockList[stockList.length - 1]) {
+                if(confirm("Last stock, advance to the next trading day?")){
+                    document.getElementById("finish-button").click();
+                }
+                else {
+                    page = 0
+                    ticker = stockList[page]
+                    getStockData(ticker)
+                }
+            }
+            else {
+                ticker = stockList[page]
+                getStockData(ticker)
+            }
         });
         $("#buy-button").click(() => {
-
             // Read input
             buyAmount = $("#buy-input").val()
             if (buyAmount == "" || buyAmount == 0) {
@@ -502,7 +515,6 @@
             // Autoclick next button
             document.getElementById("skip-button").click();
         });
-
         // thousand separators for inputs
         $("#buy-input").on("keyup", function (event) {
             // When user select text in the document, also abort.
@@ -542,13 +554,10 @@
                 return (input === 0) ? "" : input.toLocaleString("en-US");
             });
         });
-
         // When the user clicks the button, open the modal
         $("#finish-button").click(() => {
-
             // Show day results modal
             $("#day-modal").css({display: "block"})
-
             // Log user decisions
             portfolioValue = Object.keys(portfolio).map(key => {
                 currentPrice = portfolio[key].data.Open[Object.keys(portfolio[key].data.Date).find(k => portfolio[key].data.Date[k] === tradingDays[currentDate])];
@@ -667,21 +676,16 @@
             $("#continue-button").focus()
 
         })
-
         // When the user clicks anywhere outside of the modal, close it
         window.onclick = function (event) {
             if (event.target == document.getElementById("day-modal")) {
                 $("#day-modal").css({display: "none"})
             }
         }
-
         $("#close-modal").click(function () {
             $("#day-modal").css({display: "none"})
         })
-
-
     });
 </script>
 </body>
-
 </html>
