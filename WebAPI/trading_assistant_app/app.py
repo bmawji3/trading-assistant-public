@@ -46,7 +46,7 @@ def prepare_data(symbols, start_date, end_date, percent_gain, debug=False):
 
         # gather reddit mention counts
         # This allows for relative path retrieval for WebApp and WebAPI
-        reddit_fp = os.path.join('trading_assistant_app', 'reddit_data', f'{symbol}_rss.csv')
+        reddit_fp = os.path.join('trading_assistant_app', 'reddit_refined', f'{symbol}_rss_wc.csv')
 
         # This should be used when running the app/main function independent of WebApp and WebAPI
         # reddit_fp = os.path.join(os.getcwd(), 'reddit_data', f'{symbol}_rss.csv')
@@ -271,7 +271,7 @@ def get_technical_indicators_for_date(symbol,
 def get_wsb_volume_for_date(symbol, given_date):
     # gather reddit mention counts
     # This allows for relative path retrieval for WebApp and WebAPI
-    reddit_fp = os.path.join('trading_assistant_app', 'reddit_data', f'{symbol}_rss.csv')
+    reddit_fp = os.path.join('trading_assistant_app', 'reddit_refined', f'{symbol}_rss_wc.csv')
 
     # This should be used when running the app/main function independent of WebApp and WebAPI
     # reddit_fp = os.path.join(os.getcwd(), 'reddit_data', f'{symbol}_rss.csv')
