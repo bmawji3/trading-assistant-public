@@ -251,10 +251,11 @@
 
     var buyingPower = 10000
     var portfolio = {}
-    var stockData = {} // Hold current stock ohlcv
+    var stockData = {}
 
     var chartTI = {sma1: false, ema1: false, bb1: false, sma2: false, ema2: false, bb2: false}
     var tiValues = {sma1: 2, ema1: 2, bb1: 2, sma2: 2, ema2: 2, bb2: 2}
+
     function plotStockData(ticker, data) {
         indexToday = Object.values(data["Date"]).findIndex(x => x === tradingDays[currentDate])
         socialSentiment = Object.values(data["wsb_volume"])[indexToday]
@@ -545,6 +546,9 @@
                 }
             }
             else {
+                if (page > stockList.length) {
+                    page = 0
+                }
                 ticker = stockList[page]
                 getStockData(ticker)
             }
@@ -662,6 +666,7 @@
 
             // Start next date
             currentDate += 1
+            page = 0
             document.getElementById("buy-input").value = "";
             document.getElementById("sell-input").value = "";
             // finish game and save results in the server
