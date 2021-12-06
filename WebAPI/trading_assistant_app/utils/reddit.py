@@ -132,7 +132,7 @@ class PushShift:
         return df
 
 
-start_date = datetime.datetime(2019, 10, 7)
+start_date = datetime.datetime(2021, 12, 4)
 end_date = datetime.datetime(2012, 1, 31)
 delta = datetime.timedelta(days=1)
 i = 0
