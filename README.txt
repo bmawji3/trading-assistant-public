@@ -49,7 +49,10 @@ To gather financial data, you will need to run trading-assistant/WebAPI/trading_
 You need to edit it as it is configured to be run with the WebAPI. This includes commenting out dot imports on lines 9-12
 and uncommenting lines 15-18.
 
-Run the PushShift API as follows:
+Run the PushShift API with the code snippets as follows:
+`test = PushShift(datetime.datetime(2021, 1, 1))`
+`tickers = test.text_with_ticker()`
+`python trading_assistant_app/utils/reddit.py`
 
 Then, in app.py, in lines 396-397, you can uncomment and download financial data as follows:
 reddit_files = [f.split('_rss.csv')[0] for f in os.listdir('trading_assistant_app/reddit_data')]
